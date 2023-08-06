@@ -14,7 +14,7 @@
 #include "utils/uartstdio.h"
 #include "driverlib/flash.h"
 
-static void usb_init(){
+static void uart_init(){
     //no need sysctlclockset?
     // Tiva Ports configuration
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
@@ -35,7 +35,7 @@ static void usb_init(){
                                 UART_CONFIG_PAR_NONE));
 }
 
-void usb_deinit(){
+void uart_deinit(){
     UARTDisable(UART1_BASE);
     SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOC);
     SysCtlPeripheralDisable(SYSCTL_PERIPH_UART1);
@@ -48,9 +48,9 @@ static void start_app(uint32_t pc, uint32_t sp) {
     ");
 }
 
-int main(){
+int main(void){
     //configure serial communication
-    usb_init();
+    uart_init();
     //listen for commands - polling method
     uint32_t msg;
     int flash_buffer_limit = 4; 
@@ -60,11 +60,13 @@ int main(){
     uint32_t flash_buffer[flash_buffer_limit];
     while (true)
     {
-        msg = UARTCharGet(GPIO_PORTC_BASE);
+        msg = UARTCharGet(UART1_BASE);
         switch (msg){
             case 0b11111111:
                 //initialise write
                 flash_write_flag = 1;
+                //acknowledgement
+                UARTCharPut(UART1_BASE, 0b11111111);
             case 0b00000000:
                 //start program
                 flash_write_flag=0;
@@ -72,7 +74,7 @@ int main(){
                 uint32_t *app_code = (uint32_t *)__approm_start__;
                 uint32_t app_sp = app_code[0];
                 uint32_t app_start = app_code[1];
-                usb_deinit();
+                uart_deinit();
                 start_app(app_start, app_sp);
             default:
                 if(flash_write_flag){

@@ -1,6 +1,6 @@
-linker_file = app_linker.ld
+linker_file = updater_linker.ld
 startup_file = startup_gcc.c
-project_file = blinkywithoutdep.c
+project_file = updater.c
 
 compiler = arm-none-eabi-gcc
 assembler = arm-none-eabi-as
@@ -17,7 +17,7 @@ obj_files = $(all_files:%.c=%.o)  $(all_dependancies:driverlib/%.c=%.o)
 all: compile link soft_clean
 link: $(obj_files)
 	@echo $(all_dependancies)
-	${linker} -T ${linker_file} -o app.bin $^
+	${linker} -T ${linker_file} -o updater.bin $^
 
 
 compile: ${project_file} ${startup_file} $(wildcard driverlib/*.c)
@@ -30,4 +30,4 @@ upload:
 	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program output.bin verify reset exit"
 
 clean:
-	@rm -f app.bin *.o *.s
+	@rm -f updater.bin *.o *.s
