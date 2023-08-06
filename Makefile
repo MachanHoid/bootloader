@@ -1,4 +1,4 @@
-linker_file = linker.ld
+linker_file = bootloader_linker.ld
 startup_file = startup_gcc.c
 project_file = main.c
 
