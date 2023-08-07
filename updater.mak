@@ -21,7 +21,7 @@ link: $(obj_files)
 
 
 compile: ${project_file} ${startup_file} $(wildcard driverlib/*.c)
-	${compiler} -I${dependancy_path} -D TARGET_IS_TM4C123_RB1 -D gcc -nostdlib --specs=nosys.specs -mcpu=cortex-m4 -mfloat-abi=hard -c $^
+	${compiler} -I${dependancy_path} -D TARGET_IS_TM4C123_RB1 -D PART_TM4C123GH6PM -D gcc -nostdlib --specs=nosys.specs -mcpu=cortex-m4 -mfloat-abi=hard -c $^
 
 soft_clean:
 	@rm -f *.o 

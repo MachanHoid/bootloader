@@ -21,13 +21,13 @@ void delay(int n){
 
 void transmit(void){
     unsigned char buffer[10];
-    FILE *ptr;
+    file *ptr;
     ptr = fopen("app.bin","rb");  // r for read, b for binary
     while (!feof(ptr)){
         fread(buffer,sizeof(buffer),1,ptr); // read 10 bytes to our buffer
         for(int i = 0; i< sizeof(buffer); i++){
             UARTCharPut(UART1_BASE, buffer[i]);
-            delay(1000);
+            // delay(1000);
         }
     }
     fclose(ptr);
