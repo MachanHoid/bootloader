@@ -17,28 +17,28 @@
 static void uart_init(){
     //no need sysctlclockset?
     // Tiva Ports configuration
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
 
     // Tiva UART starts
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_UART1);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0);
 
     // Configuring MUX of the two switches for UART1
-    GPIOPinConfigure(GPIO_PC4_U1RX);
-    GPIOPinConfigure(GPIO_PC5_U1TX);
+    GPIOPinConfigure(GPIO_PA0_U0RX);
+    GPIOPinConfigure(GPIO_PA1_U0TX);
     
     // Setting up UART in PC4 and PC5
-    GPIOPinTypeUART(GPIO_PORTC_BASE, GPIO_PIN_4 | GPIO_PIN_5);
+    GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
 
     // UART setup, keeping 9600 baud rate
-    UARTConfigSetExpClk(UART1_BASE, SysCtlClockGet(), 9600,
+    UARTConfigSetExpClk(UART0_BASE, SysCtlClockGet(), 9600,
                                 (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE |
                                 UART_CONFIG_PAR_NONE));
 }
 
 void uart_deinit(){
-    UARTDisable(UART1_BASE);
-    SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOC);
-    SysCtlPeripheralDisable(SYSCTL_PERIPH_UART1);
+    UARTDisable(UART0_BASE);
+    SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOA);
+    SysCtlPeripheralDisable(SYSCTL_PERIPH_UART0);
 }
 
 static void start_app(uint32_t pc, uint32_t sp) {
@@ -60,13 +60,13 @@ int main(void){
     uint32_t flash_buffer[flash_buffer_limit];
     while (true)
     {
-        msg = UARTCharGet(UART1_BASE);
+        msg = UARTCharGet(UART0_BASE);
         switch (msg){
             case 0b11111111:
                 //initialise write
                 flash_write_flag = 1;
                 //acknowledgement
-                UARTCharPut(UART1_BASE, 0b11111111);
+                UARTCharPut(UART0_BASE, 0b11111111);
             case 0b00000000:
                 //start program
                 flash_write_flag=0;
