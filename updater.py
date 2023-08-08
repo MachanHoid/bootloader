@@ -1,5 +1,5 @@
 import serial
-ser = serial.Serial('portname', 9600, timeout=1)
+ser = serial.Serial('/dev/tty.usbserial', 9600, timeout=1)
 while True:
     ser.write(b'\xff')
     ack = ser.read(1)
@@ -7,9 +7,9 @@ while True:
         break
 ser.close()
 
-ser2 = serial.Serial('portname', 9600)
+ser2 = serial.Serial('/dev/tty.usbserial', 9600)
 
-with open('app.bin', 'rb') as app:
+with open('app_trimmed.bin', 'rb') as app:
     bit = app.read(1)
     while bit!='':
         ser2.write(bit)
