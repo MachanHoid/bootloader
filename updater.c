@@ -15,22 +15,19 @@
 #include "utils/uartstdio.h"
 #include "driverlib/flash.h"
 
+uint32_t app_start_address = 0x00020000;
+int app_len_bytes = 128;
+
 void delay(int n){
     for(int i = 0; i < n; i++){};
 }
 
 void transmit(void){
-    unsigned char buffer[10];
-    file *ptr;
-    ptr = fopen("app.bin","rb");  // r for read, b for binary
-    while (!feof(ptr)){
-        fread(buffer,sizeof(buffer),1,ptr); // read 10 bytes to our buffer
-        for(int i = 0; i< sizeof(buffer); i++){
-            UARTCharPut(UART1_BASE, buffer[i]);
-            // delay(1000);
-        }
+    uint32_t *app_code = (uint32_t *)app_start_address;
+    for(int i = 0; i < app_len_bytes; i++){
+        UARTCharPut(UART1_BASE, app_code[i]);
+        // delay(1000);
     }
-    fclose(ptr);
 }
 
 void UARTIntHandler(void){

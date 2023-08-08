@@ -28,6 +28,7 @@ soft_clean:
 
 upload:
 	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program output.bin verify reset exit"
+	
 
 clean:
 	@rm -f updater.bin *.o *.s

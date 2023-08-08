@@ -5,6 +5,7 @@ project_file = blinkywithoutdep.c
 compiler = arm-none-eabi-gcc
 assembler = arm-none-eabi-as
 linker = arm-none-eabi-ld
+ocpy = arm-none-eabi-objcopy
 
 dependancy_path = /Users/niting/Nitin/IITM/Abhiyaan/Bootloader/bootloader_nalikkuday1/
 
@@ -14,7 +15,9 @@ obj_files = $(all_files:%.c=%.o)  $(all_dependancies:driverlib/%.c=%.o)
 
 .PHONY: all clean upload 
 
-all: compile link soft_clean
+all: compile link soft_clean trim
+trim: app.bin
+	${ocpy} --set-start=0x20000 -O app2.bin app.bin
 link: $(obj_files)
 	@echo $(all_dependancies)
 	${linker} -T ${linker_file} -o app.bin $^
@@ -30,4 +33,4 @@ upload:
 	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program output.bin verify reset exit"
 
 clean:
-	@rm -f app.bin *.o *.s
+	@rm -f app.bin app2.bin *.o *.s
