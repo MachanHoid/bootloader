@@ -17,7 +17,7 @@ obj_files = $(all_files:%.c=%.o)  $(all_dependancies:driverlib/%.c=%.o)
 
 all: compile link soft_clean trim
 trim: app.bin
-	${ocpy} --set-start=0x20000 -O app2.bin app.bin
+	python3 -u "/Users/niting/Nitin/IITM/Abhiyaan/Bootloader/bootloader_nalikkuday1/app_trimmer.py"
 link: $(obj_files)
 	@echo $(all_dependancies)
 	${linker} -T ${linker_file} -o app.bin $^
@@ -30,7 +30,7 @@ soft_clean:
 	@rm -f *.o 
 
 upload:
-	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program output.bin verify reset exit"
+	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program app.bin verify reset exit"
 
 clean:
-	@rm -f app.bin app2.bin *.o *.s
+	@rm -f app.bin app_trimmed.bin *.o *.s
