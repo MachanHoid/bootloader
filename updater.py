@@ -1,5 +1,5 @@
 import serial
-ser = serial.Serial('/dev/tty.usbserial', 9600, timeout=1)
+ser = serial.Serial('COM6', 9600, timeout=1)
 while True:
     ser.write(b'\xff')
     ack = ser.read(1)
@@ -7,11 +7,13 @@ while True:
         break
 ser.close()
 
-ser2 = serial.Serial('/dev/tty.usbserial', 9600)
-
+ser2 = serial.Serial('COM6', 9600)
+print('hello')
 with open('app_trimmed.bin', 'rb') as app:
     bit = app.read(1)
     while bit!='':
         ser2.write(bit)
         bit = app.read(1)
-    ser2.write(b'\x00')
+    # ser2.write(b'\x00')
+print('hello again')
+ser2.close()
