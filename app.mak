@@ -30,7 +30,7 @@ soft_clean:
 	@rm -f *.o 
 
 upload:
-	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program app.bin verify reset exit"
+	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program app_trimmed.bin verify reset exit"
 
 clean:
 	@rm -f app.bin app_trimmed.bin *.o *.s
