@@ -14,6 +14,48 @@
 #include "utils/uartstdio.h"
 #include "driverlib/flash.h"
 
+extern int __approm_start__;
+
+void delay( int n){
+    for(int i = 0; i<n; i++);
+}
+
+void led_setup(void){
+    //
+    // Enable the GPIO port that is used for the on-board LED.
+    //
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
+
+    //
+    // Check if the peripheral access is enabled.
+    //
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOF))
+    {
+    }
+
+    //
+    // Enable the GPIO pin for the LED (PF3).  Set the direction as output, and
+    // enable the GPIO pin for digital function.
+    //
+    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_3);
+    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_2);
+    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_1);
+
+
+}
+
+void led_on(uint8_t pin){
+    
+    GPIOPinWrite(GPIO_PORTF_BASE, pin, pin);
+
+}
+
+void led_off(uint8_t pin){
+    
+    GPIOPinWrite(GPIO_PORTF_BASE, pin, 0x0);
+
+}
+
 static void uart_init(){
     //no need sysctlclockset?
     // Tiva Ports configuration
@@ -49,8 +91,13 @@ static void start_app(uint32_t pc, uint32_t sp) {
 }
 
 int main(void){
+    led_setup();
+    // led_on(GPIO_PIN_1);
+    // delay(100000);
+    // led_off(GPIO_PIN_1);
     //configure serial communication
     uart_init();
+    // led_on(GPIO_PIN_3);
     //listen for commands - polling method
     uint32_t msg;
     int flash_buffer_limit = 4; 
@@ -58,36 +105,39 @@ int main(void){
     int flash_pointer = 0;
     int flash_write_flag = 0;
     uint32_t flash_buffer[flash_buffer_limit];
+
+    if (__approm_start__ ==0x20000) led_on(GPIO_PIN_1);
+    else{
+        led_on(GPIO_PIN_3);
+    }
+    //initial command
+    while (true){
+        msg = UARTCharGet(UART0_BASE);
+        if(msg == 0xff){
+
+            //initialise write
+            flash_write_flag = 1;
+            //acknowledgement
+            UARTCharPut(UART0_BASE, 0b11111111);
+    
+            break;
+        }
+    }
+
     while (true)
     {
         msg = UARTCharGet(UART0_BASE);
-        switch (msg){
-            case 0b11111111:
-                //initialise write
-                flash_write_flag = 1;
-                //acknowledgement
-                UARTCharPut(UART0_BASE, 0b11111111);
-            case 0b00000000:
-                //start program
-                flash_write_flag=0;
-                //change pc to start of approm, and reset conditions. PUT THIS UNDER CONDITION
-                uint32_t *app_code = (uint32_t *)__approm_start__;
-                uint32_t app_sp = app_code[0];
-                uint32_t app_start = app_code[1];
-                uart_deinit();
-                start_app(app_start, app_sp);
-            default:
-                if(flash_write_flag){
-                    flash_buffer[flash_buffer_pointer] = msg;
-                    flash_buffer_pointer += 1;
-                    if (flash_buffer_pointer == flash_buffer_limit-1){
-                        flash_buffer_pointer = 0;
-                        FlashProgram(flash_buffer, __approm_start__ + flash_pointer, flash_buffer_limit);
-                        flash_pointer += flash_buffer_limit;
-                    }
-                }
-        }
-        
+        if(flash_write_flag){
+            flash_buffer[flash_buffer_pointer] = msg;
+            flash_buffer_pointer += 1;
+            if (flash_buffer_pointer == flash_buffer_limit-1){
+                flash_buffer_pointer = 0;
+                int flashflag = FlashProgram(flash_buffer, 0x20000 + flash_pointer, flash_buffer_limit);
+                // if(flashflag==0)led_on(GPIO_PIN_3);
+                // if(flashflag==-1)led_on(GPIO_PIN_1);
+                flash_pointer += flash_buffer_limit;
+            }
+        } 
     }
     // should never be reached
     while (1);
