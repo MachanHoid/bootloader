@@ -15,12 +15,12 @@ obj_files = $(all_files:%.c=%.o)  $(all_dependancies:driverlib/%.c=%.o)
 
 .PHONY: all clean upload 
 
-all: compile link soft_clean trim
-trim: app.bin
-	python3 -u "/Users/niting/Nitin/IITM/Abhiyaan/Bootloader/bootloader_nalikkuday1/app_trimmer.py"
+all: compile link soft_clean
+
 link: $(obj_files)
 	@echo $(all_dependancies)
-	${linker} -T ${linker_file} -o app.bin $^
+	${linker} -T ${linker_file} -o app.elf $^
+	${ocpy} -O binary app.elf app.bin
 
 
 compile: ${project_file} ${startup_file} $(wildcard driverlib/*.c)
@@ -30,7 +30,7 @@ soft_clean:
 	@rm -f *.o 
 
 upload:
-	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program app_trimmed.bin verify reset exit"
+	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program app.bin verify reset exit"
 
 clean:
 	@rm -f app.bin app_trimmed.bin *.o *.s

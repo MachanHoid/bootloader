@@ -5,6 +5,8 @@ project_file = main.c
 compiler = arm-none-eabi-gcc
 assembler = arm-none-eabi-as
 linker = arm-none-eabi-ld
+ocpy = arm-none-eabi-objcopy
+
 	
 dependancy_path = /Users/niting/Nitin/IITM/Abhiyaan/Bootloader/bootloader_nalikkuday1/
 
@@ -35,14 +37,15 @@ CFLAGS +=  -T ${linker_file}
 
 compile: ${project_file} ${startup_file} ${driverlib_dependancies} #${boot_dependancies}
 	@echo compiling
-	${compiler} ${CFLAGS}  $^ -o output.bin
+	${compiler} ${CFLAGS}  $^ -o output.elf
+	${ocpy} -O binary output.elf output.bin
 	
 soft_clean:
 	@rm -f *.o
 	@echo done
 
 upload:
-	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program output.bin verify reset exit"
+	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program output.elf verify reset exit"
 
 clean:
 	@rm -f output.bin *.o *.s

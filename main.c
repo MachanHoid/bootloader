@@ -99,47 +99,56 @@ int main(void){
     uart_init();
     // led_on(GPIO_PIN_3);
     //listen for commands - polling method
-    uint32_t msg;
-    int flash_buffer_limit = 4; 
-    int flash_buffer_pointer = 0;
-    int flash_pointer = 0;
-    int flash_write_flag = 0;
-    uint32_t flash_buffer[flash_buffer_limit];
 
-    if (__approm_start__ ==0x20000) led_on(GPIO_PIN_1);
-    else{
-        led_on(GPIO_PIN_3);
-    }
-    //initial command
+    //ack
+
+    uint32_t msg;
     while (true){
         msg = UARTCharGet(UART0_BASE);
         if(msg == 0xff){
-
-            //initialise write
-            flash_write_flag = 1;
-            //acknowledgement
             UARTCharPut(UART0_BASE, 0b11111111);
-    
             break;
         }
     }
+    
+    
+    uint32_t b1;
+    uint32_t b2;
+    uint32_t b3;
+    uint32_t b4;
+    
+    //send file length
+    b1 = UARTCharGet(UART0_BASE);
+    b2 = UARTCharGet(UART0_BASE);
+    b3 = UARTCharGet(UART0_BASE);
+    b4 = UARTCharGet(UART0_BASE); 
+    uint32_t applen = (b4<<24)| (b3<<16) | (b2<<8) | b1;
+    UARTCharPut(UART0_BASE, 0b11111111);
+    
+    uint32_t bytes_received = 0;
+    uint32_t flash_buffer[1];
 
-    while (true)
+    while (bytes_received < applen - 3)
     {
-        msg = UARTCharGet(UART0_BASE);
-        if(flash_write_flag){
-            flash_buffer[flash_buffer_pointer] = msg;
-            flash_buffer_pointer += 1;
-            if (flash_buffer_pointer == flash_buffer_limit-1){
-                flash_buffer_pointer = 0;
-                int flashflag = FlashProgram(flash_buffer, 0x20000 + flash_pointer, flash_buffer_limit);
-                // if(flashflag==0)led_on(GPIO_PIN_3);
-                // if(flashflag==-1)led_on(GPIO_PIN_1);
-                flash_pointer += flash_buffer_limit;
-            }
-        } 
+        b1 = UARTCharGet(UART0_BASE);
+        b2 = UARTCharGet(UART0_BASE);
+        b3 = UARTCharGet(UART0_BASE);
+        b4 = UARTCharGet(UART0_BASE);
+        msg = (b4<<24)| (b3<<16) | (b2<<8) | b1;
+        flash_buffer[0] = msg;    
+        // led_on(GPIO_PIN_2);
+        int flashflag = FlashProgram(&msg, 0x20000 + bytes_received, 4);
+        bytes_received += 4; 
+        if(flashflag==0)led_on(GPIO_PIN_3);
+        if(flashflag==-1)led_on(GPIO_PIN_1);
+        UARTCharPut(UART0_BASE, 0b11111111);
     }
+
+    uint32_t *app_code = (uint32_t *)0x20000;
+    uint32_t app_sp = app_code[0];
+    uint32_t app_start = app_code[1];
+    start_app(app_start, app_sp);
+
     // should never be reached
     while (1);
-
 }
