@@ -144,8 +144,9 @@ int main(void){
     uint32_t applen = (b4<<24)| (b3<<16) | (b2<<8) | b1;
     UARTCharPut(UART0_BASE, 0xff);
     
+    uint32_t buffer_limit = 2;
     uint32_t bytes_received = 0;
-    uint32_t flash_buffer[1];
+    uint32_t flash_buffer[buffer_limit];
 
     while (bytes_received < applen)
     {
@@ -154,13 +155,16 @@ int main(void){
         b3 = UARTCharGet(UART0_BASE);
         b4 = UARTCharGet(UART0_BASE);
         msg = (b4<<24)| (b3<<16) | (b2<<8) | b1;
-        flash_buffer[0] = msg;    
+        flash_buffer[bytes_received % buffer_limit] = msg;  
+        bytes_received += 4;   
         // led_on(GPIO_PIN_2);
-        int flashflag = FlashProgram(&msg, 0x20000 + bytes_received, 4);
-        bytes_received += 4; 
-        if(flashflag==0)led_on(GPIO_PIN_3);
-        if(flashflag==-1)led_on(GPIO_PIN_1);
         UARTCharPut(UART0_BASE, 0xff);
+        if(bytes_received % buffer_limit==0){
+            int flashflag = FlashProgram(&flash_buffer, 0x20000 + bytes_received, 4*buffer_limit);
+            // if(flashflag==0)led_on(GPIO_PIN_3);
+            if(flashflag==-1)led_on(GPIO_PIN_1);
+        }
+        
     }
     uart_deinit();
     start_app();
