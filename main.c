@@ -83,11 +83,18 @@ void uart_deinit(){
     SysCtlPeripheralDisable(SYSCTL_PERIPH_UART0);
 }
 
-static void start_app(uint32_t pc, uint32_t sp) {
+static void branch_to_app(uint32_t pc, uint32_t sp) {
     __asm("           \n\
           msr msp, r1 /* load r1 into MSP */\n\
           bx r0       /* branch to the address at r0 */\n\
     ");
+}
+
+void start_app(void){
+    uint32_t *app_code = (uint32_t *)0x20000;
+    uint32_t app_sp = app_code[0];
+    uint32_t app_start = app_code[1];
+    branch_to_app(app_start, app_sp);
 }
 
 int main(void){
@@ -98,20 +105,32 @@ int main(void){
     //configure serial communication
     uart_init();
     // led_on(GPIO_PIN_3);
-    //listen for commands - polling method
 
     //ack
+    int32_t ack;
+    int ack_limit = 100;
+    int app_update_flag = 0;
+    for (int num_ack_tries = 0; num_ack_tries < ack_limit; num_ack_tries++){
+        if(UARTCharsAvail){
+            ack = UARTCharGetNonBlocking(UART0_BASE);
+        }
+        led_on(GPIO_PIN_2);
+        delay(40000);
+        led_off(GPIO_PIN_2);
+        delay(40000);
 
-    uint32_t msg;
-    while (true){
-        msg = UARTCharGet(UART0_BASE);
-        if(msg == 0xff){
-            UARTCharPut(UART0_BASE, 0b11111111);
+        if(ack == 0xff){
+            UARTCharPut(UART0_BASE, 0xff);
+            app_update_flag = 1;
             break;
         }
     }
+    if(!app_update_flag) {
+        start_app();
+        led_on(GPIO_PIN_2);
+    }
     
-    
+    uint32_t msg;
     uint32_t b1;
     uint32_t b2;
     uint32_t b3;
@@ -123,7 +142,7 @@ int main(void){
     b3 = UARTCharGet(UART0_BASE);
     b4 = UARTCharGet(UART0_BASE); 
     uint32_t applen = (b4<<24)| (b3<<16) | (b2<<8) | b1;
-    UARTCharPut(UART0_BASE, 0b11111111);
+    UARTCharPut(UART0_BASE, 0xff);
     
     uint32_t bytes_received = 0;
     uint32_t flash_buffer[1];
@@ -141,13 +160,10 @@ int main(void){
         bytes_received += 4; 
         if(flashflag==0)led_on(GPIO_PIN_3);
         if(flashflag==-1)led_on(GPIO_PIN_1);
-        UARTCharPut(UART0_BASE, 0b11111111);
+        UARTCharPut(UART0_BASE, 0xff);
     }
-
-    uint32_t *app_code = (uint32_t *)0x20000;
-    uint32_t app_sp = app_code[0];
-    uint32_t app_start = app_code[1];
-    start_app(app_start, app_sp);
+    uart_deinit();
+    start_app();
 
     // should never be reached
     while (1);

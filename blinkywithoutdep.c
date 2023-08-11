@@ -12,7 +12,7 @@
 #define LED_ON2            0x04
 #define LED_ON3            0x08
 
-#define DELAY_VALUE        4000000   
+#define DELAY_VALUE        400000  
 
 void Delay(void);
 
