@@ -54,9 +54,13 @@ with open('app.bin', 'rb') as app:
 num_padding = (4 - filelength%4) % 4
 for i in range(num_padding):
     ser2.write(b'\xff')
-if not(num_padding==0):
+
+if not num_padding == 0:
     ack = ser2.read(1)
     if ack == b'\xff': 
         print(f'{num_padding} byte padding sent')
+if num_padding == 0:
+    print("No padding bytes required")
+
 print('App Sent Completed')
 ser2.close()

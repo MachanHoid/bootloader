@@ -14,8 +14,6 @@
 #include "utils/uartstdio.h"
 #include "driverlib/flash.h"
 
-extern int __approm_start__;
-
 void delay( int n){
     for(volatile int i = 0; i<n; i++);
 }
@@ -98,15 +96,16 @@ void start_app(void){
 }
 
 int main(void){
+    // Configure the LED setup
     led_setup();
-    // led_on(GPIO_PIN_1);
-    // delay(100000);
-    // led_off(GPIO_PIN_1);
-    //configure serial communication
-    uart_init();
-    // led_on(GPIO_PIN_3);
 
-    //ack
+    // configure serial communication
+    uart_init();
+
+    if (__approm_size__ == 0x00020000) led_on(GPIO_PIN_2);
+    if (__approm_size__ != 0x00020000) led_on(GPIO_PIN_3);
+
+    // Setting up an acknowledgment system
     int32_t ack;
     int ack_limit = 100;
     int app_update_flag = 0;
@@ -115,9 +114,13 @@ int main(void){
             ack = UARTCharGetNonBlocking(UART0_BASE);
         }
         led_on(GPIO_PIN_2);
-        delay(40000);
+        delay(20000);
         led_off(GPIO_PIN_2);
-        delay(40000);
+        delay(20000);
+        led_on(GPIO_PIN_3);
+        delay(20000);
+        led_off(GPIO_PIN_3);
+        delay(20000);
 
         if(ack == 0xff){
             UARTCharPut(UART0_BASE, 0xff);
@@ -136,7 +139,7 @@ int main(void){
     uint32_t b3;
     uint32_t b4;
     
-    //send file length
+    // send file length
     b1 = UARTCharGet(UART0_BASE);
     b2 = UARTCharGet(UART0_BASE);
     b3 = UARTCharGet(UART0_BASE);
@@ -146,7 +149,7 @@ int main(void){
     
     uint32_t bytes_received = 0;
     uint32_t flash_buffer[1];
-
+    int flashflag;
     while (bytes_received < applen)
     {
         b1 = UARTCharGet(UART0_BASE);
@@ -155,13 +158,19 @@ int main(void){
         b4 = UARTCharGet(UART0_BASE);
         msg = (b4<<24)| (b3<<16) | (b2<<8) | b1;
         flash_buffer[0] = msg;    
-        // led_on(GPIO_PIN_2);
-        int flashflag = FlashProgram(&msg, 0x20000 + bytes_received, 4);
+        flashflag = FlashProgram(&msg, 0x20000 + bytes_received, 4);
         bytes_received += 4; 
         if(flashflag==0)led_on(GPIO_PIN_3);
         if(flashflag==-1)led_on(GPIO_PIN_1);
         UARTCharPut(UART0_BASE, 0xff);
     }
+    if (flashflag == 0){
+        led_off(GPIO_PIN_3);
+        led_on(GPIO_PIN_2);
+        delay(20000);
+        led_off(GPIO_PIN_2);
+    }
+
     uart_deinit();
     start_app();
 
