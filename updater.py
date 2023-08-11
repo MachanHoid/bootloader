@@ -1,7 +1,7 @@
 import time
 import serial
 # from time import delay
-ser = serial.Serial('/dev/tty.usbmodem0E239D471', 9600, timeout=1)
+ser = serial.Serial('/dev/tty.usbmodem0E239F201', 9600, timeout=1)
 while True:
     ser.write(b'\xff')
     ack = ser.read(1)
@@ -11,11 +11,13 @@ while True:
         break
 ser.close()
 
-ser2 = serial.Serial('/dev/tty.usbmodem0E239D471', 9600)
+ser2 = serial.Serial('/dev/tty.usbmodem0E239F201', 9600)
 print('Sending File length')
 with open('app.bin', 'rb') as app:
     filebytes = app.read()
     filelength = len(filebytes)
+    
+    print(f'file length: {filelength}')
     b1 = filelength & 0xFF
     b2 = (filelength >> 8) & 0xFF 
     b3 = (filelength >> 16) & 0xFF 
@@ -49,19 +51,12 @@ with open('app.bin', 'rb') as app:
                 print(f'{i} Bytes Sent')
         time.sleep(0.0001)
 
+num_padding = (4 - filelength%4) % 4
+for i in range(num_padding):
+    ser2.write(b'\xff')
+if not(num_padding==0):
+    ack = ser2.read(1)
+    if ack == b'\xff': 
+        print(f'{num_padding} byte padding sent')
 print('App Sent Completed')
 ser2.close()
-
-# ser2 = serial.Serial('/dev/tty.usbmodem0E239D471', 9600)
-# print('hello')
-# with open('app.bin', 'rb') as app:
-#     data = [b'\x34', b'\xff', b'\x00', b'\x78']
-#     i = 0
-#     for byte in data:
-#         print(i)
-#         ser2.write(byte)
-#         i+=1
-#         # delay(10)
-#     # ser2.write(b'\x00')
-# print('hello again')
-# ser2.close()

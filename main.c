@@ -17,7 +17,7 @@
 extern int __approm_start__;
 
 void delay( int n){
-    for(int i = 0; i<n; i++);
+    for(volatile int i = 0; i<n; i++);
 }
 
 void led_setup(void){
@@ -147,7 +147,7 @@ int main(void){
     uint32_t bytes_received = 0;
     uint32_t flash_buffer[1];
 
-    while (bytes_received < applen - 3)
+    while (bytes_received < applen)
     {
         b1 = UARTCharGet(UART0_BASE);
         b2 = UARTCharGet(UART0_BASE);
