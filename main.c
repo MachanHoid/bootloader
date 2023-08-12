@@ -16,7 +16,7 @@
 
 extern int __approm_start__;
 
-void delay( int n){
+void delay(int n){
     for(volatile int i = 0; i<n; i++);
 }
 
@@ -144,8 +144,9 @@ int main(void){
     uint32_t applen = (b4<<24)| (b3<<16) | (b2<<8) | b1;
     UARTCharPut(UART0_BASE, 0xff);
     
-    uint32_t buffer_limit = 2;
+    uint32_t buffer_limit = 3;
     uint32_t bytes_received = 0;
+    uint32_t bytes_written = 0;
     uint32_t flash_buffer[buffer_limit];
 
     while (bytes_received < applen)
@@ -158,13 +159,14 @@ int main(void){
         flash_buffer[bytes_received % buffer_limit] = msg;  
         bytes_received += 4;   
         // led_on(GPIO_PIN_2);
-        UARTCharPut(UART0_BASE, 0xff);
-        if(bytes_received % buffer_limit==0){
-            int flashflag = FlashProgram(&flash_buffer, 0x20000 + bytes_received, 4*buffer_limit);
-            // if(flashflag==0)led_on(GPIO_PIN_3);
-            if(flashflag==-1)led_on(GPIO_PIN_1);
+        if(bytes_received % (4*buffer_limit) == 0){
+            // led_on(GPIO_PIN_3);
+            int flashflag = FlashProgram(flash_buffer, 0x20000 + bytes_written, (uint32_t) 4*buffer_limit);
+            bytes_written += 4*buffer_limit;
+            if(flashflag==0) led_on(GPIO_PIN_3);
+            if(flashflag==-1) led_on(GPIO_PIN_1);
         }
-        
+        UARTCharPut(UART0_BASE, 0xff);
     }
     uart_deinit();
     start_app();
