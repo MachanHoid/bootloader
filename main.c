@@ -98,6 +98,12 @@ void start_app(void){
     branch_to_app(app_start, app_sp);
 }
 
+void erase_approm(int block_size){ //block size in bytes
+    for(int i = 0; i< (approm_size/block_size); i++){
+        FlashErase(approm_start+ i*block_size);
+    }
+}
+
 int main(void){
     led_setup();
     // led_on(GPIO_PIN_1);
@@ -147,6 +153,8 @@ int main(void){
     
     uint32_t bytes_received = 0;
     uint32_t flash_buffer[1];
+
+    erase_approm(1024);
 
     while (bytes_received < applen)
     {
