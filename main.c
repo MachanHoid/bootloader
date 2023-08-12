@@ -13,6 +13,8 @@
 #include "driverlib/uart.h"
 #include "utils/uartstdio.h"
 #include "driverlib/flash.h"
+#include "inc/tm4c123gh6pm.h"
+#include "driverlib/interrupt.h"
 
 //defining variables
 uint32_t approm_start = &__approm_start__;
@@ -24,7 +26,7 @@ void delay( int n){
     for(volatile int i = 0; i<n; i++);
 }
 
-void led_setup(void){
+void led_init(void){
     //
     // Enable the GPIO port that is used for the on-board LED.
     //
@@ -48,6 +50,10 @@ void led_setup(void){
 
 }
 
+void led_deinit(void){
+   SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOF); 
+}
+
 void led_on(uint8_t pin){
     
     GPIOPinWrite(GPIO_PORTF_BASE, pin, pin);
@@ -58,6 +64,15 @@ void led_off(uint8_t pin){
     
     GPIOPinWrite(GPIO_PORTF_BASE, pin, 0x0);
 
+}
+
+void blink(uint8_t pin, int n){
+    for(int i = 0; i<n; i++){
+        led_on(pin);
+        delay(400000);
+        led_off(pin);
+        delay(400000);
+    }
 }
 
 static void uart_init(){
@@ -87,6 +102,26 @@ void uart_deinit(){
     SysCtlPeripheralDisable(SYSCTL_PERIPH_UART0);
 }
 
+//Interrupt service routine
+void GPIOIntHandler(void){
+	GPIOIntClear(GPIO_PORTB_BASE, GPIO_INT_PIN_0);
+	blink(GPIO_PIN_3, 1);
+}
+
+void GPIO_int_init(void){
+	SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
+	GPIOPinTypeGPIOInput(GPIO_PORTB_BASE, GPIO_PIN_0);
+	GPIOPadConfigSet(GPIO_PORTB_BASE, GPIO_PIN_0, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
+	GPIOIntEnable(GPIO_PORTB_BASE, GPIO_INT_PIN_0);
+	GPIOIntTypeSet(GPIO_PORTB_BASE, GPIO_PIN_0, GPIO_FALLING_EDGE);
+	IntPrioritySet(INT_GPIOB, 0);
+	IntRegister(INT_GPIOB, GPIOIntHandler);
+	IntEnable(INT_GPIOB);
+	IntMasterEnable();
+}
+
+
+
 static void branch_to_app(uint32_t pc, uint32_t sp) {
     __asm("           \n\
           msr msp, r1 /* load r1 into MSP */\n\
@@ -108,13 +143,14 @@ void erase_approm(int block_size){ //block size in bytes
 }
 
 int main(void){
-    led_setup();
+    led_init();
     // led_on(GPIO_PIN_1);
     // delay(100000);
     // led_off(GPIO_PIN_1);
     //configure serial communication
     uart_init();
     // led_on(GPIO_PIN_3);
+    GPIO_int_init();
 
     //ack
     int32_t ack;
@@ -174,7 +210,10 @@ int main(void){
         if(flashflag==-1)led_on(GPIO_PIN_1);
         UARTCharPut(UART0_BASE, 0xff);
     }
+    led_off(GPIO_PIN_1);
+    led_off(GPIO_PIN_3);
     uart_deinit();
+    led_deinit();
     start_app();
 
     // should never be reached
