@@ -19,6 +19,8 @@ obj_files = $(project_file:%.c=%.o) $(startup_file:boot_loader/%.S:%.o)  $(boot_
 
 all: compile soft_clean
 
+everything: clean compile soft_clean upload
+
 defines = TARGET_IS_TM4C123_RB1 \
 		PART_TM4C123GH6PM \
 		gcc \
