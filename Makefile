@@ -50,4 +50,4 @@ upload:
 	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program output.elf verify reset exit"
 
 clean:
-	@rm -f output.bin *.o *.s
+	@rm -f output.bin output.elf *.o *.s
