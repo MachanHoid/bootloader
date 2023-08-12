@@ -57,6 +57,15 @@ void led_off(uint8_t pin){
 
 }
 
+void blink(uint8_t pin, int n){
+    for(int i = 0; i < n; i++){
+        led_on(pin);
+        delay(600000);
+        led_off(pin);
+        delay(600000);
+    }
+}
+
 static void uart_init(){
     //no need sysctlclockset?
     // Tiva Ports configuration
@@ -84,6 +93,23 @@ void uart_deinit(){
     SysCtlPeripheralDisable(SYSCTL_PERIPH_UART0);
 }
 
+void GPIOIntHandler(void){
+    GPIOIntClear(GPIO_PORTF_BASE, GPIO_INT_PIN_0);
+    blink(GPIO_PIN_1, 2);
+}
+
+void gpio_int_setup(void){
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
+    GPIOPinTypeGPIOInput(GPIO_PORTF_BASE, GPIO_PIN_0);
+    GPIOPadConfigSet(GPIO_PORTF_BASE, GPIO_PIN_0, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
+    GPIOIntEnable(GPIO_PORTF_BASE, GPIO_INT_PIN_0);
+	GPIOIntTypeSet(GPIO_PORTF_BASE, GPIO_PIN_0, GPIO_FALLING_EDGE);
+	IntPrioritySet(INT_GPIOF, 0);
+	IntRegister(INT_GPIOF, GPIOIntHandler);
+	IntEnable(INT_GPIOF);
+	IntMasterEnable();
+}
+
 static void branch_to_app(uint32_t pc, uint32_t sp) {
     __asm("           \n\
           msr msp, r1 /* load r1 into MSP */\n\
@@ -106,13 +132,11 @@ void erase_approm(int block_size){ //block size in bytes
 
 int main(void){
     led_setup();
-    // led_on(GPIO_PIN_1);
-    // delay(100000);
-    // led_off(GPIO_PIN_1);
     //configure serial communication
+    blink(GPIO_PIN_3, 5);
     uart_init();
     // led_on(GPIO_PIN_3);
-
+    gpio_int_setup();
     //ack
     int32_t ack;
     int ack_limit = 100;
