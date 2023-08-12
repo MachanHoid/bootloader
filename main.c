@@ -14,8 +14,11 @@
 #include "utils/uartstdio.h"
 #include "driverlib/flash.h"
 
-#define approm_start 0x20000
-#define approm_size 0x20000
+//defining variables
+uint32_t approm_start = &__approm_start__;
+uint32_t approm_size = &__approm_size__;
+uint32_t bootrom_start = &__bootrom_start__;
+uint32_t bootrom_size = &__bootrom_size__;
 
 void delay( int n){
     for(volatile int i = 0; i<n; i++);
