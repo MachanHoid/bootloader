@@ -14,8 +14,6 @@
 #include "utils/uartstdio.h"
 #include "driverlib/flash.h"
 
-extern int __approm_start__;
-
 void delay( int n){
     for(volatile int i = 0; i<n; i++);
 }
@@ -91,7 +89,7 @@ static void branch_to_app(uint32_t pc, uint32_t sp) {
 }
 
 void start_app(void){
-    uint32_t *app_code = (uint32_t *)0x20000;
+    uint32_t *app_code = (uint32_t *) &__approm_start__;
     uint32_t app_sp = app_code[0];
     uint32_t app_start = app_code[1];
     branch_to_app(app_start, app_sp);
@@ -156,7 +154,7 @@ int main(void){
         msg = (b4<<24)| (b3<<16) | (b2<<8) | b1;
         flash_buffer[0] = msg;    
         // led_on(GPIO_PIN_2);
-        int flashflag = FlashProgram(&msg, 0x20000 + bytes_received, 4);
+        int flashflag = FlashProgram(&msg, &__approm_start__ + bytes_received, 4);
         bytes_received += 4; 
         if(flashflag==0)led_on(GPIO_PIN_3);
         if(flashflag==-1)led_on(GPIO_PIN_1);
