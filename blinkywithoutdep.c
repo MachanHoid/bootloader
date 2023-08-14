@@ -129,7 +129,7 @@ int main(void)
 	{
 		blink(GPIO_PIN_2, 1);                  //Delay almost 1 sec
 	}
-	// start_bootloader();
+	start_bootloader();
 
     return 0;
 }
