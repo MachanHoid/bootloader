@@ -98,6 +98,15 @@ void start_app(void){
     uint32_t *app_code = (uint32_t *) approm_start;
     uint32_t app_sp = app_code[0];
     uint32_t app_start = app_code[1];
+
+    //VTOR can only be accessed from privileged mode?
+    //specifying the start of the approm to be the offset for vector table
+    uint32_t *app_vector_table = (uint32_t *) approm_start;
+    //specifying the vtor location
+    uint32_t *vtor = (uint32_t *)0xE000ED08;
+    //writing offset to vtor. the bitwise & is to allign it to 1024 bytes as there are 134 interupts. last 10 bits are reserved.
+    *vtor = ((uint32_t) app_vector_table & 0xFFFFFC00);
+
     branch_to_app(app_start, app_sp);
 }
 
