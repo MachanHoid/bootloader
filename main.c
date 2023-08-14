@@ -118,12 +118,8 @@ void erase_approm(int block_size){ //block size in bytes
 
 int main(void){
     led_setup();
-    // led_on(GPIO_PIN_1);
-    // delay(100000);
-    // led_off(GPIO_PIN_1);
     //configure serial communication
     uart_init();
-    // led_on(GPIO_PIN_3);
 
     //ack
     int32_t ack;
@@ -164,7 +160,6 @@ int main(void){
     UARTCharPut(UART0_BASE, 0xff);
     
     uint32_t bytes_received = 0;
-    uint32_t flash_buffer[1];
 
     erase_approm(1024);
 
@@ -175,8 +170,7 @@ int main(void){
         b3 = UARTCharGet(UART0_BASE);
         b4 = UARTCharGet(UART0_BASE);
         msg = (b4<<24)| (b3<<16) | (b2<<8) | b1;
-        flash_buffer[0] = msg;    
-        // led_on(GPIO_PIN_2);
+
         int flashflag = FlashProgram(&msg, approm_start + bytes_received, 4);
         bytes_received += 4; 
         if(flashflag==0)led_on(GPIO_PIN_3);
