@@ -22,10 +22,18 @@
 #include "driverlib/sysctl.h"
 #include "driverlib/gpio.h"
 #include "driverlib/interrupt.h"
+#include "memory_map.h"
 
-void delay( int n){
-    for(volatile int i = 0; i<n; i++);
-}
+//defining variables
+uint32_t approm_start = 0x20000;
+uint32_t approm_size =0x20000;
+uint32_t bootrom_start = 0x0000;
+uint32_t bootrom_size = 0x20000;
+
+
+// void delay( int n){
+//     for(volatile int i = 0; i<n; i++);
+// }
 
 void led_setup(void){
     //
@@ -85,9 +93,24 @@ void GPIO_int_init(void){
 	GPIOIntEnable(GPIO_PORTB_BASE, GPIO_INT_PIN_0);
 	GPIOIntTypeSet(GPIO_PORTB_BASE, GPIO_PIN_0, GPIO_FALLING_EDGE);
 	IntPrioritySet(INT_GPIOB, 0);
-	IntRegister(INT_GPIOB, GPIOIntHandler);
+	// IntRegister(INT_GPIOB, GPIOIntHandler);
 	IntEnable(INT_GPIOB);
 	IntMasterEnable();
+}
+
+static void branch_to_app(uint32_t pc, uint32_t sp) {
+    __asm("           \n\
+          msr msp, r1 /* load r1 into MSP */\n\
+          bx r0       /* branch to the address at r0 */\n\
+    ");
+
+}
+
+void start_bootloader(void){
+    uint32_t *bootloader_code = (uint32_t *) bootrom_start;
+    uint32_t bootloader_sp = bootloader_code[0];
+    uint32_t bootloader_start = bootloader_code[1];
+    branch_to_app(bootloader_start, bootloader_sp);
 }
 
 int main(void)
@@ -102,10 +125,11 @@ int main(void)
 	GPIO_PORTF_DEN_R  |= GPIO_PORTF_PIN3_EN;    //enable pins 3 on PORTF
 	GPIO_PORTF_DIR_R  |= GPIO_PORTF_PIN3_EN;    //make pins 3 as output pins
 	
-	while(1)
+	for(int i = 0; i<20; i++)
 	{
 		blink(GPIO_PIN_2, 1);                  //Delay almost 1 sec
 	}
+	// start_bootloader();
 
     return 0;
 }

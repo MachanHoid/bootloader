@@ -1,5 +1,5 @@
 linker_file = app_linker.ld
-startup_file = startup_gcc.c
+startup_file = app_startup_gcc.c
 project_file = blinkywithoutdep.c
 
 compiler = arm-none-eabi-gcc

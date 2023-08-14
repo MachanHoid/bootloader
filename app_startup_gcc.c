@@ -41,6 +41,22 @@
 #include "inc/hw_nvic.h"
 #include "inc/hw_types.h"
 
+#define SYSCTL_RCGCGPIO_R (*((volatile unsigned long *) 0x400FE608))
+#define GPIO_PORTF_DEN_R  (*((volatile unsigned long *) 0x4002551C))
+#define GPIO_PORTF_DIR_R  (*((volatile unsigned long *) 0x40025400))
+#define GPIO_PORTF_DATA_R (*((volatile unsigned long *) 0x40025038))
+
+	 
+#define GPIO_PORTF_CLK_EN  0x20
+#define GPIO_PORTF_PIN1_EN 0x02
+#define GPIO_PORTF_PIN2_EN 0x04
+#define GPIO_PORTF_PIN3_EN 0x08
+#define LED_ON1            0x02
+#define LED_ON2            0x04
+#define LED_ON3            0x08
+
+#define DELAY_VALUE        400000  
+
 //*****************************************************************************
 //
 // Forward declaration of the default fault handlers.
@@ -50,6 +66,7 @@ void ResetISR(void);
 static void NmiSR(void);
 static void FaultISR(void);
 static void IntDefaultHandler(void);
+static void app_int_handler(void);
 
 //*****************************************************************************
 //
@@ -92,7 +109,7 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // The PendSV handler
     IntDefaultHandler,                      // The SysTick handler
     IntDefaultHandler,                      // GPIO Port A
-    IntDefaultHandler,                      // GPIO Port B
+    app_int_handler,                      // GPIO Port B
     IntDefaultHandler,                      // GPIO Port C
     IntDefaultHandler,                      // GPIO Port D
     IntDefaultHandler,                      // GPIO Port E
@@ -355,3 +372,27 @@ IntDefaultHandler(void)
     {
     }
 }
+
+void delay( int n){
+    for(volatile int i = 0; i<n; i++);
+}
+
+static void app_int_handler(void){
+    HWREG(0x40005000 + 0x0000041C) = 0x00000001;
+    SYSCTL_RCGCGPIO_R |= GPIO_PORTF_CLK_EN;     //enable clock for PORTF
+	GPIO_PORTF_DEN_R  |= GPIO_PORTF_PIN1_EN;    //enable pins 1 on PORTF
+	GPIO_PORTF_DIR_R  |= GPIO_PORTF_PIN1_EN;    //make pins 1 as output pins
+	GPIO_PORTF_DEN_R  |= GPIO_PORTF_PIN2_EN;    //enable pins 2 on PORTF
+	GPIO_PORTF_DIR_R  |= GPIO_PORTF_PIN2_EN;    //make pins 2 as output pins
+	GPIO_PORTF_DEN_R  |= GPIO_PORTF_PIN3_EN;    //enable pins 3 on PORTF
+	GPIO_PORTF_DIR_R  |= GPIO_PORTF_PIN3_EN;    //make pins 3 as output pins
+	
+	for(int i = 0; i<2; i++)
+	{
+		GPIO_PORTF_DATA_R = 0x02;    //Turn on RED LED 	 
+		delay(400000);	                   //Delay almost 1 sec
+		GPIO_PORTF_DATA_R = 0x00;    //Turn  off LED
+		delay(400000);                                //Delay almost 1 sec
+	}
+}
+

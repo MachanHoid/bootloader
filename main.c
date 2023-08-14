@@ -22,9 +22,9 @@ uint32_t approm_size = &__approm_size__;
 uint32_t bootrom_start = &__bootrom_start__;
 uint32_t bootrom_size = &__bootrom_size__;
 
-void delay( int n){
-    for(volatile int i = 0; i<n; i++);
-}
+// void delay( int n){
+//     for(volatile int i = 0; i<n; i++);
+// }
 
 void led_init(void){
     //
@@ -115,7 +115,7 @@ void GPIO_int_init(void){
 	GPIOIntEnable(GPIO_PORTB_BASE, GPIO_INT_PIN_0);
 	GPIOIntTypeSet(GPIO_PORTB_BASE, GPIO_PIN_0, GPIO_FALLING_EDGE);
 	IntPrioritySet(INT_GPIOB, 0);
-	IntRegister(INT_GPIOB, GPIOIntHandler);
+	// IntRegister(INT_GPIOB, GPIOIntHandler);
 	IntEnable(INT_GPIOB);
 	IntMasterEnable();
 }

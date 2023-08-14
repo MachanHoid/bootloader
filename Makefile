@@ -1,5 +1,5 @@
 linker_file = bootloader_linker.ld
-startup_file = startup_gcc.c
+startup_file = bootloader_startup_gcc.c
 project_file = main.c
 
 compiler = arm-none-eabi-gcc
