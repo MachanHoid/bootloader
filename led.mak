@@ -1,6 +1,6 @@
-linker_file = app_linker.ld
-startup_file = app_startup_gcc.c
-project_file = blinkywithoutdep.c
+linker_file = shared.ld
+startup_file = led_startup_gcc.c
+project_file = led_init.c
 
 compiler = arm-none-eabi-gcc
 assembler = arm-none-eabi-as
@@ -8,7 +8,6 @@ linker = arm-none-eabi-ld
 ocpy = arm-none-eabi-objcopy
 
 dependancy_path = /home/adi/Abhiyaan/CAN_BootLoader/bootloader_nitin/bootloader_nalikkuday1/
-
 all_files =${project_file} ${startup_file}
 all_dependancies = $(wildcard driverlib/*.c)
 obj_files = $(all_files:%.c=%.o)  $(all_dependancies:driverlib/%.c=%.o)
@@ -19,8 +18,8 @@ all: compile link soft_clean
 
 link: $(obj_files)
 	@echo $(all_dependancies)
-	${linker} -T ${linker_file} -o app.elf $^
-	${ocpy} -O binary app.elf app.bin
+	${linker} -T ${linker_file} -o led.elf $^
+	${ocpy} -O binary led.elf led.bin
 
 
 compile: ${project_file} ${startup_file} $(wildcard driverlib/*.c)

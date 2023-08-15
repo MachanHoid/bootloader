@@ -25,59 +25,106 @@
 #include "memory_map.h"
 
 //defining variables
-uint32_t approm_start = 0x20000;
-uint32_t approm_size =0x20000;
-uint32_t bootrom_start = 0x0000;
-uint32_t bootrom_size = 0x20000;
+//defining variables
+uint32_t approm_start = &__approm_start__;
+uint32_t approm_size = &__approm_size__;
+uint32_t bootrom_start = &__bootrom_start__;
+uint32_t bootrom_size = &__bootrom_size__;
+uint32_t shared_start = &__shared_start__;
+uint32_t shared_size = &__shared_size__;
 
 
-// void delay( int n){
-//     for(volatile int i = 0; i<n; i++);
-// }
+// tells the source is app
+*LED_SOURCE = 1;
 
-void led_setup(void){
-    //
-    // Enable the GPIO port that is used for the on-board LED.
-    //
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
-
-    //
-    // Check if the peripheral access is enabled.
-    //
-    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOF))
-    {
-    }
-
-    //
-    // Enable the GPIO pin for the LED (PF3).  Set the direction as output, and
-    // enable the GPIO pin for digital function.
-    //
-    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_3);
-    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_2);
-    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_1);
-
-
+static void branch_to_app(uint32_t pc, uint32_t sp) {
+    __asm("           \n\
+          msr msp, r1 /* load r1 into MSP */\n\
+          bx r0       /* branch to the address at r0 */\n\
+    ");
 }
 
-void led_on(uint8_t pin){
-    
-    GPIOPinWrite(GPIO_PORTF_BASE, pin, pin);
+void start_bootloader(void){
+    uint32_t *bootloader_code = (uint32_t *) 0x00000;
+    uint32_t bootloader_sp = bootloader_code[0];
+    uint32_t bootloader_start = bootloader_code[1];
 
+    uint32_t *led_vector_table = (uint32_t *) 0x00000;
+    //specifying the vtor location
+    uint32_t *vtor = (uint32_t *)0xE000ED08;
+    //writing offset to vtor. the bitwise & is to allign it to 1024 bytes as there are 134 interupts. last 10 bits are reserved.
+    *vtor = ((uint32_t) led_vector_table & 0xFFFFFC00);
+
+    branch_to_app(bootloader_start, bootloader_sp);
+}
+
+void start_led(){
+    uint32_t *led_code = (uint32_t *) 0x15000;
+    uint32_t led_sp = led_code[0];
+    uint32_t led_start = led_code[1];
+
+    //VTOR can only be accessed from privileged mode
+    //specifying the start of the approm to be the offset for vector table
+    uint32_t *led_vector_table = (uint32_t *) 0x15000;
+    //specifying the vtor location
+    uint32_t *vtor = (uint32_t *)0xE000ED08;
+    //writing offset to vtor. the bitwise & is to allign it to 1024 bytes as there are 134 interupts. last 10 bits are reserved.
+    *vtor = ((uint32_t) led_vector_table & 0xFFFFFC00);
+
+    branch_to_app(led_start, led_sp);
+}
+
+void start_app(void){
+    uint32_t *app_code = (uint32_t *) 0x20000;
+    uint32_t app_sp = app_code[0];
+    uint32_t app_start = app_code[1];
+
+    //VTOR can only be accessed from privileged mode
+    //specifying the start of the approm to be the offset for vector table
+    uint32_t *app_vector_table = (uint32_t *) 0x20000;
+    //specifying the vtor location
+    uint32_t *vtor = (uint32_t *)0xE000ED08;
+    //writing offset to vtor. the bitwise & is to allign it to 1024 bytes as there are 134 interupts. last 10 bits are reserved.
+    *vtor = ((uint32_t) app_vector_table & 0xFFFFFC00);
+
+    branch_to_app(app_start, app_sp);
+}
+
+
+void led_on(uint8_t pin){
+    if (pin == GPIO_PIN_1)pin = 0;
+    if (pin == GPIO_PIN_2)pin = 1;
+    if (pin == GPIO_PIN_3)pin = 2;
+
+    *LED_POINTER_COLOUR = pin; 
+    *LED_MODE = 1;
+    *LED_TYPE = 0;
+    *LED_BLINK_NUMBER = 0;
+
+    start_led();
 }
 
 void led_off(uint8_t pin){
-    
-    GPIOPinWrite(GPIO_PORTF_BASE, pin, 0x0);
+    if (pin == GPIO_PIN_1)pin = 0;
+    if (pin == GPIO_PIN_2)pin = 1;
+    if (pin == GPIO_PIN_3)pin = 2;
 
+    *LED_POINTER_COLOUR = pin; 
+    *LED_MODE = 0;
+    *LED_TYPE = 0;
+    *LED_BLINK_NUMBER = 0;
+
+    start_led();
+    GPIOPinWrite(GPIO_PORTF_BASE, pin, 0x0);
+    start_bootloader();
 }
 
 void blink(uint8_t pin, int n){
-    for(int i = 0; i<n; i++){
-        led_on(pin);
-        delay(400000);
-        led_off(pin);
-        delay(400000);
-    }
+    *LED_POINTER_COLOUR = pin; 
+    *LED_MODE = 2;
+    *LED_TYPE = 1;
+    *LED_BLINK_NUMBER = n;
+    start_bootloader();
 }
 
 //Interrupt service routine
@@ -98,20 +145,6 @@ void GPIO_int_init(void){
 	IntMasterEnable();
 }
 
-static void branch_to_app(uint32_t pc, uint32_t sp) {
-    __asm("           \n\
-          msr msp, r1 /* load r1 into MSP */\n\
-          bx r0       /* branch to the address at r0 */\n\
-    ");
-
-}
-
-void start_bootloader(void){
-    uint32_t *bootloader_code = (uint32_t *) bootrom_start;
-    uint32_t bootloader_sp = bootloader_code[0];
-    uint32_t bootloader_start = bootloader_code[1];
-    branch_to_app(bootloader_start, bootloader_sp);
-}
 
 int main(void)
 {
@@ -127,9 +160,9 @@ int main(void)
 	
 	for(int i = 0; i<20; i++)
 	{
-		blink(GPIO_PIN_2, 1);                  //Delay almost 1 sec
+		blink(GPIO_PIN_2, 1, 400000);                  //Delay almost 1 sec
 	}
-	start_bootloader();
+	// start_bootloader();
 
     return 0;
 }

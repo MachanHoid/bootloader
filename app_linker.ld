@@ -37,11 +37,7 @@
  *
  *****************************************************************************/
 
-MEMORY
-{
-    FLASH (rx) : ORIGIN = 0x00020000, LENGTH = 0x00020000
-    SRAM (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00008000
-}
+INLCUDE memory_map.ld
 
 SECTIONS
 {

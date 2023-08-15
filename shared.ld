@@ -48,7 +48,7 @@ SECTIONS
         *(.text*)
         *(.rodata*)
         _etext = .;
-    } > BOOTROM
+    } > SHARED
 
     .data : AT(ADDR(.text) + SIZEOF(.text))
     {

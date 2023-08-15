@@ -21,58 +21,98 @@ uint32_t approm_start = &__approm_start__;
 uint32_t approm_size = &__approm_size__;
 uint32_t bootrom_start = &__bootrom_start__;
 uint32_t bootrom_size = &__bootrom_size__;
+uint32_t shared_start = &__shared_start__;
+uint32_t shared_size = &__shared_size__;
 
-// void delay( int n){
-//     for(volatile int i = 0; i<n; i++);
-// }
+*LED_SOURCE = 0;
 
-void led_init(void){
-    //
-    // Enable the GPIO port that is used for the on-board LED.
-    //
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
-
-    //
-    // Check if the peripheral access is enabled.
-    //
-    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOF))
-    {
-    }
-
-    //
-    // Enable the GPIO pin for the LED (PF3).  Set the direction as output, and
-    // enable the GPIO pin for digital function.
-    //
-    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_3);
-    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_2);
-    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_1);
-
-
+static void branch_to_app(uint32_t pc, uint32_t sp) {
+    __asm("           \n\
+          msr msp, r1 /* load r1 into MSP */\n\
+          bx r0       /* branch to the address at r0 */\n\
+    ");
 }
 
-void led_deinit(void){
-   SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOF); 
+void start_bootloader(void){
+    uint32_t *bootloader_code = (uint32_t *) 0x00000;
+    uint32_t bootloader_sp = bootloader_code[0];
+    uint32_t bootloader_start = bootloader_code[1];
+
+    uint32_t *led_vector_table = (uint32_t *) 0x00000;
+    //specifying the vtor location
+    uint32_t *vtor = (uint32_t *)0xE000ED08;
+    //writing offset to vtor. the bitwise & is to allign it to 1024 bytes as there are 134 interupts. last 10 bits are reserved.
+    *vtor = ((uint32_t) led_vector_table & 0xFFFFFC00);
+
+    branch_to_app(bootloader_start, bootloader_sp);
+}
+
+void start_led(){
+    uint32_t *led_code = (uint32_t *) 0x15000;
+    uint32_t led_sp = led_code[0];
+    uint32_t led_start = led_code[1];
+
+    //VTOR can only be accessed from privileged mode
+    //specifying the start of the approm to be the offset for vector table
+    uint32_t *led_vector_table = (uint32_t *) 0x15000;
+    //specifying the vtor location
+    uint32_t *vtor = (uint32_t *)0xE000ED08;
+    //writing offset to vtor. the bitwise & is to allign it to 1024 bytes as there are 134 interupts. last 10 bits are reserved.
+    *vtor = ((uint32_t) led_vector_table & 0xFFFFFC00);
+
+    branch_to_app(led_start, led_sp);
+}
+
+void start_app(void){
+    uint32_t *app_code = (uint32_t *) 0x20000;
+    uint32_t app_sp = app_code[0];
+    uint32_t app_start = app_code[1];
+
+    //VTOR can only be accessed from privileged mode
+    //specifying the start of the approm to be the offset for vector table
+    uint32_t *app_vector_table = (uint32_t *) 0x20000;
+    //specifying the vtor location
+    uint32_t *vtor = (uint32_t *)0xE000ED08;
+    //writing offset to vtor. the bitwise & is to allign it to 1024 bytes as there are 134 interupts. last 10 bits are reserved.
+    *vtor = ((uint32_t) app_vector_table & 0xFFFFFC00);
+
+    branch_to_app(app_start, app_sp);
 }
 
 void led_on(uint8_t pin){
-    
-    GPIOPinWrite(GPIO_PORTF_BASE, pin, pin);
+    if (pin == GPIO_PIN_1)pin = 0;
+    if (pin == GPIO_PIN_2)pin = 1;
+    if (pin == GPIO_PIN_3)pin = 2;
 
+    *LED_POINTER_COLOUR = pin; 
+    *LED_MODE = 1;
+    *LED_DELAY = 0;
+    *LED_BLINK_NUMBER = 0;
+
+    start_led();
 }
 
 void led_off(uint8_t pin){
-    
-    GPIOPinWrite(GPIO_PORTF_BASE, pin, 0x0);
+    if (pin == GPIO_PIN_1)pin = 0;
+    if (pin == GPIO_PIN_2)pin = 1;
+    if (pin == GPIO_PIN_3)pin = 2;
 
+    *LED_POINTER_COLOUR = pin; 
+    *LED_MODE = 0;
+    *LED_DELAY = 0;
+    *LED_BLINK_NUMBER = 0;
+
+    start_led();
+    GPIOPinWrite(GPIO_PORTF_BASE, pin, 0x0);
+    start_bootloader();
 }
 
-void blink(uint8_t pin, int n){
-    for(int i = 0; i<n; i++){
-        led_on(pin);
-        delay(400000);
-        led_off(pin);
-        delay(400000);
-    }
+void blink(uint8_t pin, int n, uint32_t delay = 40000){
+    *LED_POINTER_COLOUR = pin; 
+    *LED_MODE = 2;
+    *LED_DELAY = delay;
+    *LED_BLINK_NUMBER = n;
+    start_bootloader();
 }
 
 static void uart_init(){
@@ -121,38 +161,44 @@ void GPIO_int_init(void){
 }
 
 
-
-static void branch_to_app(uint32_t pc, uint32_t sp) {
-    __asm("           \n\
-          msr msp, r1 /* load r1 into MSP */\n\
-          bx r0       /* branch to the address at r0 */\n\
-    ");
-}
-
-void start_app(void){
-    uint32_t *app_code = (uint32_t *) approm_start;
-    uint32_t app_sp = app_code[0];
-    uint32_t app_start = app_code[1];
-
-    //VTOR can only be accessed from privileged mode
-    //specifying the start of the approm to be the offset for vector table
-    uint32_t *app_vector_table = (uint32_t *) approm_start;
-    //specifying the vtor location
-    uint32_t *vtor = (uint32_t *)0xE000ED08;
-    //writing offset to vtor. the bitwise & is to allign it to 1024 bytes as there are 134 interupts. last 10 bits are reserved.
-    *vtor = ((uint32_t) app_vector_table & 0xFFFFFC00);
-
-    branch_to_app(app_start, app_sp);
-}
-
 void erase_approm(int block_size){ //block size in bytes
     for(int i = 0; i< (approm_size/block_size); i++){
         FlashErase(approm_start+ i*block_size);
     }
 }
 
+void led_init(){
+    uint32_t bytes_received = 0;
+    uint32_t msg;
+    uint32_t b1;
+    uint32_t b2;
+    uint32_t b3;
+    uint32_t b4;
+    
+    //send file length
+    b1 = UARTCharGet(UART0_BASE);
+    b2 = UARTCharGet(UART0_BASE);
+    b3 = UARTCharGet(UART0_BASE);
+    b4 = UARTCharGet(UART0_BASE); 
+    uint32_t applen = (b4<<24)| (b3<<16) | (b2<<8) | b1;
+    UARTCharPut(UART0_BASE, 0xff);
+
+    while (bytes_received < applen)
+    {
+        b1 = UARTCharGet(UART0_BASE);
+        b2 = UARTCharGet(UART0_BASE);
+        b3 = UARTCharGet(UART0_BASE);
+        b4 = UARTCharGet(UART0_BASE);
+        msg = (b4<<24)| (b3<<16) | (b2<<8) | b1;
+        // led_on(GPIO_PIN_2);
+        int flashflag = FlashProgram(&msg, 0x15000 + bytes_received, 4);
+        bytes_received += 4; 
+        UARTCharPut(UART0_BASE, 0xff);
+    }
+    blink(GPIO_PIN_2, 2, 40000);
+}
+
 int main(void){
-    led_init();
     // led_on(GPIO_PIN_1);
     // delay(100000);
     // led_off(GPIO_PIN_1);
@@ -160,6 +206,7 @@ int main(void){
     uart_init();
     // led_on(GPIO_PIN_3);
     GPIO_int_init();
+    led_init();
 
     //ack
     int32_t ack;
@@ -213,7 +260,7 @@ int main(void){
         msg = (b4<<24)| (b3<<16) | (b2<<8) | b1;
         flash_buffer[0] = msg;    
         // led_on(GPIO_PIN_2);
-        int flashflag = FlashProgram(&msg, approm_start + bytes_received, 4);
+        int flashflag = FlashProgram(&msg, 0x20000 + bytes_received, 4);
         bytes_received += 4; 
         if(flashflag==0)led_on(GPIO_PIN_3);
         if(flashflag==-1)led_on(GPIO_PIN_1);

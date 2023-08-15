@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "gpio.h": "c",
+        "stdbool.h": "c",
+        "memory_map.h": "c"
+    }
+}
