@@ -8,8 +8,7 @@ linker = arm-none-eabi-ld
 ocpy = arm-none-eabi-objcopy
 
 	
-dependancy_path = /Usersdependancy_path = /home/adi/Abhiyaan/CAN_BootLoader/bootloader_nitin/bootloader_nalikkuday1/
-/niting/Nitin/IITM/Abhiyaan/Bootloader/bootloader_nalikkuday1/
+dependancy_path = /home/adi/Abhiyaan/CAN_BootLoader/bootloader_nitin/bootloader_nalikkuday1/
 
 all_files =${project_file} ${startup_file}
 driverlib_dependancies = $(wildcard driverlib/*.c)
