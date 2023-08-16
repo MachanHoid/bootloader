@@ -1,6 +1,6 @@
-linker_file = app_linker.ld
+linker_file = bootloader_linker.ld
 startup_file = startup_gcc.c
-project_file = blinkywithoutdep.c
+project_file = main.c
 
 compiler = arm-none-eabi-gcc
 assembler = arm-none-eabi-as
@@ -39,15 +39,15 @@ CFLAGS +=  -T ${linker_file}
 
 compile: ${project_file} ${startup_file} #${driverlib_dependancies} #${boot_dependancies}
 	@echo compiling
-	${compiler} ${CFLAGS}  $^ -o app.elf
-	${ocpy} -O binary app.elf app.bin
+	${compiler} ${CFLAGS}  $^ -o output.elf
+	${ocpy} -O binary output.elf output.bin
 	
 soft_clean:
 	@rm -f *.o
 	@echo done
 
 upload:
-	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program app.elf verify reset exit"
+	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program output.elf verify reset exit"
 
 clean:
-	@rm -f app.bin app.elf *.o *.s
+	@rm -f output.bin output.elf *.o *.s

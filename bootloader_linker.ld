@@ -67,3 +67,5 @@ SECTIONS
         _ebss = .;
     } > SRAM
 }
+
+INCLUDE shared_syms.ld

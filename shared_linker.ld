@@ -48,7 +48,7 @@ SECTIONS
         *(.text*)
         *(.rodata*)
         _etext = .;
-    } > APPROM
+    } > SHARED
 
     .data : AT(ADDR(.text) + SIZEOF(.text))
     {
@@ -67,5 +67,3 @@ SECTIONS
         _ebss = .;
     } > SRAM
 }
-
-INCLUDE shared_syms.ld
