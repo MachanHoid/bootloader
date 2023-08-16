@@ -24,4 +24,5 @@ uint32_t* LED_MODE = (uint32_t *)0x19008;
 // 1 : app
 uint32_t* LED_SOURCE = (uint32_t *)0x19012;
 
+// no of blinks
 uint32_t* LED_BLINK_NUMBER = (uint32_t *)0x19016;
