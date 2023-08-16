@@ -12,7 +12,6 @@ dependancy_path = /Users/niting/Nitin/IITM/Abhiyaan/Bootloader/bootloader_nalikk
 
 all_files =${project_file} ${startup_file}
 driverlib_dependancies = $(wildcard driverlib/*.c)
-#boot_dependancies = $(wildcard boot_loader/*.c) 
 obj_files = $(project_file:%.c=%.o) $(startup_file:boot_loader/%.S:%.o)  $(boot_dependancies:boot_loader/%.c=%.o)
 
 .PHONY: all clean upload soft_clean
@@ -37,17 +36,17 @@ CFLAGS += $(foreach d,$(defines),-D $(d))
 
 CFLAGS +=  -T ${linker_file}
 
-compile: ${project_file} ${startup_file} #${driverlib_dependancies} #${boot_dependancies}
+compile: ${project_file} ${startup_file}
 	@echo compiling
-	${compiler} ${CFLAGS}  $^ -o output.elf
-	${ocpy} -O binary output.elf output.bin
+	${compiler} ${CFLAGS}  $^ -o boot.elf
+	${ocpy} -O binary boot.elf boot.bin
 	
 soft_clean:
 	@rm -f *.o
 	@echo done
 
 upload:
-	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program output.elf verify reset exit"
+	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program boot.elf verify reset exit"
 
 clean:
-	@rm -f output.bin output.elf *.o *.s
+	@rm -f boot.bin boot.elf *.o *.s
