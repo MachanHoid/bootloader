@@ -26,54 +26,6 @@ uint32_t bootrom_size = &__bootrom_size__;
 //     for(volatile int i = 0; i<n; i++);
 // }
 
-void led_init(void){
-    //
-    // Enable the GPIO port that is used for the on-board LED.
-    //
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
-
-    //
-    // Check if the peripheral access is enabled.
-    //
-    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOF))
-    {
-    }
-
-    //
-    // Enable the GPIO pin for the LED (PF3).  Set the direction as output, and
-    // enable the GPIO pin for digital function.
-    //
-    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_3);
-    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_2);
-    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_1);
-
-
-}
-
-void led_deinit(void){
-   SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOF); 
-}
-
-void led_on(uint8_t pin){
-    
-    GPIOPinWrite(GPIO_PORTF_BASE, pin, pin);
-
-}
-
-void led_off(uint8_t pin){
-    
-    GPIOPinWrite(GPIO_PORTF_BASE, pin, 0x0);
-
-}
-
-void blink(uint8_t pin, int n){
-    for(int i = 0; i<n; i++){
-        led_on(pin);
-        delay(400000);
-        led_off(pin);
-        delay(400000);
-    }
-}
 
 static void uart_init(){
     //no need sysctlclockset?
@@ -130,13 +82,13 @@ static void branch_to_app(uint32_t pc, uint32_t sp) {
 }
 
 void start_app(void){
-    uint32_t *app_code = (uint32_t *) approm_start;
+    uint32_t *app_code = (uint32_t *) 0x00025000;
     uint32_t app_sp = app_code[0];
     uint32_t app_start = app_code[1];
 
     //VTOR can only be accessed from privileged mode
     //specifying the start of the approm to be the offset for vector table
-    uint32_t *app_vector_table = (uint32_t *) approm_start;
+    uint32_t *app_vector_table = (uint32_t *) 0x00025000;
     //specifying the vtor location
     uint32_t *vtor = (uint32_t *)0xE000ED08;
     //writing offset to vtor. the bitwise & is to allign it to 1024 bytes as there are 134 interupts. last 10 bits are reserved.

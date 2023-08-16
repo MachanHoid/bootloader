@@ -1,6 +1,5 @@
-linker_file = bootloader_linker.ld
-startup_file = bootloader_startup_gcc.c
-project_file = main.c
+linker_file = shared.ld
+project_file = shared.c
 
 compiler = arm-none-eabi-gcc
 assembler = arm-none-eabi-as
@@ -37,17 +36,17 @@ CFLAGS += $(foreach d,$(defines),-D $(d))
 
 CFLAGS +=  -T ${linker_file}
 
-compile: ${project_file} ${startup_file} #${driverlib_dependancies} #${boot_dependancies}
+compile: ${project_file} ${driverlib_dependancies} #${boot_dependancies}
 	@echo compiling
-	${compiler} ${CFLAGS}  $^ -o output.elf
-	${ocpy} -O binary output.elf output.bin
+	${compiler} ${CFLAGS}  $^ -o shared.elf
+	${ocpy} -O binary shared.elf shared.bin
 	
 soft_clean:
 	@rm -f *.o
 	@echo done
 
 upload:
-	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program output.elf verify reset exit"
+	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program shared.elf verify reset exit"
 
 clean:
 	@rm -f output.bin output.elf *.o *.s

@@ -7,12 +7,9 @@ assembler = arm-none-eabi-as
 linker = arm-none-eabi-ld
 ocpy = arm-none-eabi-objcopy
 
-dependancy_path = /Users/niting/Nitin/IITM/Abhiyaan/Bootloader/bootloader_nalikkuday1/
-
+dependancy_path = /home/adi/Abhiyaan/CAN_BootLoader/bootloader_nitin/bootloader_nalikkuday1/
 all_files =${project_file} ${startup_file}
-all_dependancies = $(wildcard driverlib/*.c)
-obj_files = $(all_files:%.c=%.o)  $(all_dependancies:driverlib/%.c=%.o)
-
+obj_files = $(all_files:%.c=%.o)
 .PHONY: all clean upload 
 
 all: compile link soft_clean
@@ -23,7 +20,7 @@ link: $(obj_files)
 	${ocpy} -O binary app.elf app.bin
 
 
-compile: ${project_file} ${startup_file} $(wildcard driverlib/*.c)
+compile: ${project_file} ${startup_file}
 	${compiler} -I${dependancy_path} -D TARGET_IS_TM4C123_RB1 -D gcc -nostdlib --specs=nosys.specs -mcpu=cortex-m4 -mfloat-abi=hard -c $^
 
 soft_clean:

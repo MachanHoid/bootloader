@@ -39,7 +39,8 @@
 
 MEMORY
 {
-    FLASH (rx) : ORIGIN = 0x00020000, LENGTH = 0x00020000
+    FLASH (rx) : ORIGIN = 0x00025000, LENGTH = 0x00015000
+    SHARED (rx) : ORIGIN = 0x00010000, LENGTH = 0x0015000
     SRAM (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00008000
 }
 
@@ -71,3 +72,4 @@ SECTIONS
         _ebss = .;
     } > SRAM
 }
+INCLUDE shared_syms.ld
