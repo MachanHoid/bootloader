@@ -52,6 +52,7 @@ soft_clean:
 	@echo done
 
 update_syms:
+	@echo syms file created with shared files
 	@ ./${addressTable}
 
 upload:
