@@ -1,7 +1,7 @@
-dependancy_path = /Users/niting/Nitin/IITM/Abhiyaan/Bootloader/bootloader_nalikkuday1/
+dependancy_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 updater_file = updater.py
 
-all : shared bootloader app upload_bootloader upload_shared transmit_app
+all : shared bootloader app #upload_bootloader upload_shared transmit_app
 
 shared:
 	make -f shared.mak

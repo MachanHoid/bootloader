@@ -8,7 +8,9 @@ linker = arm-none-eabi-ld
 ocpy = arm-none-eabi-objcopy
 
 	
-dependancy_path = /Users/niting/Nitin/IITM/Abhiyaan/Bootloader/bootloader_nalikkuday1/
+# dependancy_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+dependancy_path = /home/adi/Abhiyaan/CAN_BootLoader/bootloader_nitin/bootloader_nalikkuday1/
+
 
 all_files =${project_file} ${startup_file}
 driverlib_dependancies = $(wildcard driverlib/*.c)
@@ -16,7 +18,7 @@ obj_files = $(project_file:%.c=%.o) $(startup_file:boot_loader/%.S:%.o)  $(boot_
 
 .PHONY: all clean upload soft_clean
 
-all: compile soft_clean
+all:makeBuildDir compile soft_clean
 
 everything: clean compile soft_clean
 
@@ -36,14 +38,17 @@ CFLAGS += $(foreach d,$(defines),-D $(d))
 
 CFLAGS +=  -T ${linker_file}
 
+makeBuildDir: 
+	mkdir -p build/app
+
 compile: ${project_file} ${startup_file}
 	@echo compiling
-	${compiler} ${CFLAGS}  $^ -o app.elf
-	${ocpy} -O binary app.elf app.bin
+	${compiler} ${CFLAGS}  $^ -o build/app/app.elf
+	${ocpy} -O binary build/app/app.elf build/app/app.bin
 	
 soft_clean:
 	@rm -f *.o
 	@echo done
 
 clean:
-	@rm -f app.bin app.elf *.o *.s
+	@rm -f build/app/app.bin build/app/app.elf *.o *.s

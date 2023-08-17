@@ -6,8 +6,12 @@ assembler = arm-none-eabi-as
 linker = arm-none-eabi-ld
 ocpy = arm-none-eabi-objcopy
 
+addressTable = gen_address_table.sh
+
 	
-dependancy_path = /Users/niting/Nitin/IITM/Abhiyaan/Bootloader/bootloader_nalikkuday1/
+# dependancy_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+dependancy_path = /home/adi/Abhiyaan/CAN_BootLoader/bootloader_nitin/bootloader_nalikkuday1/
+
 
 all_files =${project_file} ${startup_file}
 driverlib_dependancies = $(wildcard driverlib/*.c)
@@ -15,7 +19,7 @@ obj_files = $(project_file:%.c=%.o) $(startup_file:boot_loader/%.S:%.o)  $(boot_
 
 .PHONY: all clean upload soft_clean
 
-all: compile soft_clean update_syms
+all:makeBuildDir compile soft_clean update_syms
 
 everything: clean compile soft_clean update_syms upload
 
@@ -35,10 +39,13 @@ CFLAGS += $(foreach d,$(defines),-D $(d))
 
 CFLAGS +=  -T ${linker_file}
 
+makeBuildDir: 
+	mkdir -p build/sharedMemory
+
 compile: ${project_file} ${driverlib_dependancies}
 	@echo compiling
-	${compiler} ${CFLAGS}  $^ -o shared.elf
-	${ocpy} -O binary shared.elf shared.bin
+	${compiler} ${CFLAGS}  $^ -o build/sharedMemory/shared.elf
+	${ocpy} -O binary build/sharedMemory/shared.elf build/sharedMemory/shared.bin
 	
 soft_clean:
 	@rm -f *.o
@@ -46,10 +53,11 @@ soft_clean:
 	@echo done
 
 update_syms:
-	./gen_address_table.sh
+	@ echo update_syms
+	@ source ${addressTable}
 
 upload:
-	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program shared.elf verify reset exit"
+	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program build/sharedMemory/shared.elf verify reset exit"
 
 clean:
-	@rm -f shared.bin shared.elf *.o *.s
+	@rm -f build/sharedMemory/shared.bin build/sharedMemory/shared.elf *.o *.s
