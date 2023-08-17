@@ -8,9 +8,7 @@ ocpy = arm-none-eabi-objcopy
 
 addressTable = gen_address_table.sh
 
-	
-# dependancy_path := $(abspath $(lastword $(MAKEFILE_LIST)))
-dependancy_path = /home/adi/Abhiyaan/CAN_BootLoader/bootloader_nitin/bootloader_nalikkuday1/
+dependancy_path:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 
 all_files =${project_file} ${startup_file}
@@ -27,7 +25,7 @@ defines = TARGET_IS_TM4C123_RB1 \
 		PART_TM4C123GH6PM \
 		gcc \
 
-includes = ${dependancy_path} 
+includes = ${dependancy_path}/ 
 
 CFLAGS = -nostdlib \
 		--specs=nosys.specs \
@@ -40,6 +38,7 @@ CFLAGS += $(foreach d,$(defines),-D $(d))
 CFLAGS +=  -T ${linker_file}
 
 makeBuildDir: 
+	echo ${dependancy_path}
 	mkdir -p build/sharedMemory
 
 compile: ${project_file} ${driverlib_dependancies}
@@ -53,8 +52,7 @@ soft_clean:
 	@echo done
 
 update_syms:
-	@ echo update_syms
-	@ source ${addressTable}
+	@ ./${addressTable}
 
 upload:
 	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program build/sharedMemory/shared.elf verify reset exit"

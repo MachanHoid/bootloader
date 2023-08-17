@@ -7,9 +7,7 @@ assembler = arm-none-eabi-as
 linker = arm-none-eabi-ld
 ocpy = arm-none-eabi-objcopy
 
-	
-# dependancy_path := $(abspath $(lastword $(MAKEFILE_LIST)))
-dependancy_path = /home/adi/Abhiyaan/CAN_BootLoader/bootloader_nitin/bootloader_nalikkuday1/
+dependancy_path:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 all_files =${project_file} ${startup_file}
 driverlib_dependancies = $(wildcard driverlib/*.c)

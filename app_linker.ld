@@ -68,4 +68,4 @@ SECTIONS
     } > SRAM
 }
 
-INCLUDE shared_syms.ld
+INCLUDE build/sharedMemory/shared_syms.ld
