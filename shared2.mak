@@ -2,7 +2,7 @@ compiler = arm-none-eabi-gcc
 assembler = arm-none-eabi-as
 linker = arm-none-eabi-ld
 ocpy = arm-none-eabi-objcopy
-
+shared_file = shared.c
 driverlib_src_dir = driverlib
 driverlib_src = $(wildcard $(driverlib_src_dir)/*.c)
 
@@ -75,3 +75,26 @@ stage3: $(project_obj_file) $(linker_file)
 # https://stackoverflow.com/questions/41511317/why-does-ld-include-sections-in-the-output-file-that-are-not-specified-in-the-li
 # https://stackoverflow.com/questions/53584666/why-does-gnu-ld-include-a-section-that-does-not-appear-in-the-linker-script
 
+
+
+compile_bootloader: compile_bootloader_stage1 compile_bootloader_stage2 link_bootloader
+
+$(driverlib_obj_dir)/%.o : $(driverlib_src_dir)/%.c
+	$(compiler) $(DRIVERLIB_COMPILE_FLAGS) $< -o $@
+
+compile_bootloader_stage1: $(driverlib_obj_dir) $(driverlib_obj)
+
+$(driverlib_obj_dir):
+	mkdir -p $(driverlib_obj_dir)
+
+compile_bootloader_stage2: $(shared_file)
+	@echo compiling main, startup and shared
+	$(compiler) $(DRIVERLIB_COMPILE_FLAGS) $^
+
+
+
+LFAGS = -T ${linker_file}
+LFAGS += --gc-sections
+# 	change this wildcard to a seperate variable like driverlib_obj and put all .o files in a seperate file
+link_bootloader: 
+	$(linker) $(LFAGS) $(wildcard *.o) $(driverlib_obj) -o build/sharedMemory/shared.elf 

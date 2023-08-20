@@ -1,7 +1,7 @@
 linker = open("shared_linker.ld",'r')
 function = open("bootloader_intersection_driverlib.txt",'r')
 notFunction = open("bootloader_difference_driverlib.txt",'r')
-newLinker = open("shared_linker.ld",'w')
+newLinker = open("shared_linker_temp.ld",'w')
 
 new_linker = ''
 functions = [i.split()[0] for i in function.readlines()]
