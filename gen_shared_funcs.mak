@@ -75,9 +75,11 @@ compile_bootloader_stage2: $(project_file) $(startup_file) $(shared_file)
 
 LFAGS = -T ${linker_file}
 LFAGS += --gc-sections
-# 	change this wildcard to a seperate variable like driverlib_obj and put all .o files in a seperate file
+# 	change this wildcard to a seperate variable like driverlib_obj and put all .o files in a seperate file IMPORTANT
+# this variable is to be changed to be not hardcoded
+all_project_obj_files = main.o shared.o startup_gcc.o
 link_bootloader: 
-	$(linker) $(LFAGS) $(wildcard *.o) $(driverlib_obj) -o build/shared/bootloader_raw.elf 
+	$(linker) $(LFAGS) $(all_project_obj_files) $(driverlib_obj) -o build/shared/bootloader_raw.elf 
 	
 soft_clean:
 	@rm -f *.o
@@ -89,6 +91,8 @@ get_dependancies:
 	arm-none-eabi-nm --format=posix ${LIB_NAME_DIR}bootloader_raw.elf > ${LIB_NAME_DIR}bootloader_raw_funcs.txt
 	arm-none-eabi-nm --format=posix ${LIB_NAME_DIR}driverlib.elf > ${LIB_NAME_DIR}driverlib_funcs.txt
 	$(python) -u "$(LIB_NAME_DIR)compare.py"
+	$(python) -u "$(LIB_NAME_DIR)make_linker.py"
+
 
 clean:
 	@rm -f build/bootloader/boot.bin build/bootloader/boot.elf *.o *.s

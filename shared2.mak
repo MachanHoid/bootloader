@@ -13,7 +13,7 @@ defines = TARGET_IS_TM4C123_RB1 \
 		PART_TM4C123GH6PM \
 		gcc \
 		
-dependancy_path = $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST)))) 
+dependancy_path = $(strip $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST)))))
 includes = ${dependancy_path} 
 
 DRIVERLIB_COMPILE_FLAGS = -nostdlib \
@@ -25,13 +25,15 @@ DRIVERLIB_COMPILE_FLAGS = -nostdlib \
 DRIVERLIB_COMPILE_FLAGS += $(foreach i,$(includes),-I$(i))
 DRIVERLIB_COMPILE_FLAGS += $(foreach d,$(defines),-D $(d))
 
-all: stage1 stage2 stage3
+addressTable = gen_address_table.sh
+
+all: stage1 stage2 stage3 update_syms
 
 $(driverlib_obj_dir)/%.o : $(driverlib_src_dir)/%.c
 	$(compiler) $(DRIVERLIB_COMPILE_FLAGS) $< -o $@
 
 stage1: $(driverlib_obj_dir) $(driverlib_obj)
-
+	@echo stage 1
 $(driverlib_obj_dir):
 	mkdir -p $(driverlib_obj_dir)
 
@@ -45,7 +47,7 @@ $(project_obj_file): $(project_file)
 	$(compiler) $(DRIVERLIB_COMPILE_FLAGS) $< -o $@
 
 stage2: $(project_obj_file)
-
+	@echo stage 2
 
 
 # CFLAGS = -nostdlib \
@@ -62,11 +64,20 @@ stage2: $(project_obj_file)
 
 CFLAGS =  -T $(linker_file)
 
-linker_file = shared_linker_temp.ld
-elf_file = shared_temp.elf
+shared_path = ${dependancy_path}/build/sharedMemory
 
-stage3: $(project_obj_file) $(linker_file) 
-	$(linker) $(CFLAGS) $< -o $(elf_file)
+linker_file = shared_linker_new.ld
+elf_file = ${shared_path}/shared.elf
+
+all_obj_files = $(project_obj_file) $(driverlib_obj)
+
+stage3: $(all_obj_files)
+	@echo stage 3
+	$(linker) $(CFLAGS) $^ -o $(elf_file)
+
+update_syms:
+	@echo syms file created with shared files
+	@ ./${addressTable}
 
 # Once this is done remove unnecessary sections using 
 # arm-none-eabi-objcopy --remove-sections <section name> <file name>

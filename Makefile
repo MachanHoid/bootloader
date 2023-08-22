@@ -1,14 +1,18 @@
 dependancy_path:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 updater_file = updater.py
 
-all : shared bootloader app upload_bootloader upload_shared transmit_app
+all : prepare_shared shared bootloader app upload_bootloader upload_shared transmit_app
+
+prepare_shared:
+	make -f gen_shared_funcs.mak
 
 shared:
-	make -f shared.mak
+	make -f shared2.mak
 
 bootloader:
 	make -f boot.mak 
 
+# this part needs change
 app:
 	make -f app.mak
 
