@@ -1,0 +1,27 @@
+FaultISR t 30352 6
+GPIODirModeSet T 3035e 76
+GPIOPadConfigSet T 303d4 2da
+GPIOPinTypeGPIOOutput T 306dc 2c
+GPIOPinWrite T 306b0 2c
+IntDefaultHandler t 30358 6
+NmiSR t 3034c 6
+ResetISR T 302e0 64
+SysCtlPeripheralEnable T 30760 50
+SysCtlPeripheralReady T 30708 58
+__approm_size__ A 10000 
+__approm_start__ T 30000 
+__bootrom_size__ A 18000 
+__bootrom_start__ T 0 
+__shared_size__ A 18000 
+__shared_start__ T 0 
+_bss B 20000000 
+_data T 20000000 
+_ebss B 20000100 
+_edata T 20000000 
+_etext T 307b0 
+_ldata A 307b0 
+_text T 30000 
+g_pfnVectors T 30000 26c
+main T 3026c 74
+pui32Stack b 20000000 100
+zero_loop t 30310 
