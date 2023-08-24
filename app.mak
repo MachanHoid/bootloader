@@ -45,7 +45,7 @@ LFAGS = -T ${linker_file}
 LFAGS += --gc-sections
 LFLAGS += --print-gc-sections
 
-CFLAGS =  -T $(app_linker_file)
+CFLAGS =  -T $(app_linker_file) --gc-sections
 #------------------------------------------------------------------------
 all: gen_driverlib_obj gen_all_files link_app_raw  optimise_dependancies build_final soft_clean
 #------------------------------------------------------------------------
