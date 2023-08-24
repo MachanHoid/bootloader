@@ -1,6 +1,7 @@
 import numpy as np
 
 app_dir = 'build/app/'
+shared_dir = 'build/shared/'
 
 #swapping shared ad app_raw because our logic is flipped
 shared = open(f'{app_dir}app_raw_funcs.txt')
@@ -20,17 +21,28 @@ while (app_element):
     app_funcs.add(app_element.split()[0])
     app_element = app.readline()
 
-app_intersection_shared = app_funcs.intersection(shared_funcs)
-app_difference_shared = shared_funcs.difference(app_funcs)
+sharedanddriverlib = open(f'{shared_dir}driverlib_funcs.txt')
+sharedanddriverlib_funcs = set()
 
+sharedanddriverlib_element = sharedanddriverlib.readline()
+while (sharedanddriverlib_element):
+    # print(bootloader_element)
+    sharedanddriverlib_funcs.add(sharedanddriverlib_element.split()[0])
+    sharedanddriverlib_element = sharedanddriverlib.readline()
+
+
+includes = shared_funcs.difference(app_funcs)
+discards = sharedanddriverlib_funcs.difference(includes)
 shared.close()
 app.close()
 
-intersection = open(f'{app_dir}app_intersection_shared.txt','w')
 difference = open(f'{app_dir}app_difference_shared.txt','w')
 
-intersection.write('\n'.join(app_intersection_shared))
-difference.write('\n'.join(app_difference_shared))
+difference.write('\n'.join(includes))
 
-intersection.close()
 difference.close()
+
+
+intersection = open(f'{app_dir}sharedanddriverlib_difference_includes.txt','w')
+intersection.write('\n'.join(discards))
+intersection.close()

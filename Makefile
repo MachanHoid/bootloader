@@ -7,7 +7,7 @@ prepare_shared:
 	make -f gen_shared_funcs.mak
 
 shared:
-	make -f shared2.mak
+	make -f shared.mak
 
 bootloader:
 	make -f boot.mak 
@@ -23,4 +23,4 @@ upload_shared:
 	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program build/sharedMemory/shared.elf verify reset exit"
 	
 transmit_app:
-	python3 -u "${dependancy_path}${updater_file}" 
+	python3 -u "${dependancy_path}/${updater_file}" 

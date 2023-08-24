@@ -1,8 +1,8 @@
-NmiSR
-g_pfnVectors
 main
-FaultISR
-zero_loop
 ResetISR
-IntDefaultHandler
 pui32Stack
+IntDefaultHandler
+FaultISR
+NmiSR
+zero_loop
+g_pfnVectors

@@ -4,7 +4,7 @@ linker = open("app_linker.ld",'r')
 # function is for the list of functions that are to be included
 function = open(f"{app_dir}app_difference_shared.txt",'r')
 #notFunction is for the list of functions that are to be discarded
-notFunction = open(f"{app_dir}app_intersection_shared.txt",'r')
+notFunction = open(f"{app_dir}sharedanddriverlib_difference_includes.txt",'r')
 newLinker = open("app_linker_new.ld",'w')
 
 new_linker = ''

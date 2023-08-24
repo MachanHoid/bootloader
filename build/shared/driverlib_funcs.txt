@@ -916,7 +916,7 @@ _UARTIntNumberGet t c374 78
 _USBIndexRead t d354 58
 _USBIndexWrite t d2fc 58
 _USBIntNumberGet t d72e 52
-__approm_size__ A 20000 
+__approm_size__ A 10000 
 __approm_start__ T 30000 
 __bootrom_size__ A 18000 
 __bootrom_start__ T 0 
