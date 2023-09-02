@@ -1,8 +1,0 @@
-g_pfnVectors
-NmiSR
-FaultISR
-pui32Stack
-IntDefaultHandler
-ResetISR
-main
-zero_loop
