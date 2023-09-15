@@ -13,6 +13,7 @@ AWK_PATH=/usr/bin/
 
 dependancy_path:= .
 
+# We should also have a JSON file where we can give the include paths 
 rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
 
 sharedlib_src_dir = shared_libraries
@@ -29,6 +30,7 @@ defines = TARGET_IS_TM4C123_RB1 \
 		PART_TM4C123GH6PM \
 		gcc \
 
+# Why are we doing this? Automate it??s
 includes = ${dependancy_path}/shared_libraries \
 			${dependancy_path}/shared_libraries/inc \
 			${dependancy_path}/shared_libraries/driverlib \
@@ -62,6 +64,7 @@ compile_sharedlib: $(sharedlib_src)
 
 compile_bootloader: compile_bootloader_stage1 compile_bootloader_stage2 link_bootloader
 
+# What's this ? Why are we doing separately
 sharedlib_driverlib_dir = $(sharedlib_obj_dir)/driverlib
 
 compile_bootloader_stage1: $(sharedlib_obj_dir) $(sharedlib_driverlib_dir) $(sharedlib_obj) 
@@ -79,6 +82,9 @@ $(sharedlib_obj_dir)/%.o : $(sharedlib_src_dir)/%.c
 boot_files = $(project_file) $(startup_file)
 # NOT WORKING PLS CHECK - doing some jugaad for now
 # boot_obj = $(patsubst %/%.c, build/obj_temp/boot_obj_temp/%.o, $(boot_files))
+
+# Should not do this manually. Bootloader might be made up of several files on its own. 
+# Including them manually is wrong
 boot_obj = build/obj_temp/boot_obj_temp/boot.o build/obj_temp/boot_obj_temp/startup_gcc.o 
 boot_obj_dir = build/obj_temp/boot_obj_temp 
 
