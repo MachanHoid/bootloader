@@ -8,7 +8,7 @@ MEMORY
 
 __bootrom_start__ = ORIGIN(BOOTROM);
 __bootrom_size__ = LENGTH(BOOTROM);
-__shared_start__ = ORIGIN(BOOTROM);
-__shared_size__ = LENGTH(BOOTROM);
+__shared_start__ = ORIGIN(SHARED);
+__shared_size__ = LENGTH(SHARED);
 __approm_start__ = ORIGIN(APPROM);
 __approm_size__ = LENGTH(APPROM);

@@ -1,5 +1,8 @@
 import numpy as np
 
+#TODO: change the variable names properly
+
+
 driverlib = open(f'build/helper_files_temp/shared_files/sharedlib_funcs.txt')
 driverlib_funcs = set()
 

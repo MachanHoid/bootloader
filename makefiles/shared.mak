@@ -17,10 +17,7 @@ defines = TARGET_IS_TM4C123_RB1 \
 		PART_TM4C123GH6PM \
 		gcc \
 		
-includes = ${dependancy_path}/shared_libraries \
-			${dependancy_path}/shared_libraries/inc \
-			${dependancy_path}/shared_libraries/driverlib \
-			${dependancy_path}/shared_libraries/utils
+includes = ${dependancy_path}/shared_libraries 
 
 SHAREDLIB_COMPILE_FLAGS = -nostdlib \
 						-mcpu=cortex-m4 \
@@ -38,6 +35,7 @@ all: compile_sharedlib link update_syms
 $(sharedlib_obj_dir)/%.o : $(sharedlib_src_dir)/%.c
 	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $< -o $@
 
+#TODO: Change here also
 sharedlib_driverlib_dir = $(sharedlib_obj_dir)/driverlib
 
 compile_sharedlib: $(sharedlib_obj_dir) $(sharedlib_driverlib_dir) $(sharedlib_obj)
@@ -59,6 +57,7 @@ link: $(sharedlib_obj)
 	@echo linking shared.elf
 	$(linker) $(CFLAGS) $^ -o $(elf_file)
 
+# TODO: do it only for functions. It does for all symbols? 
 update_syms:
 	@echo syms file created with shared files
 	@ scripts/${addressTable} outputs/shared.elf build/linkers_temp/shared_syms.ld

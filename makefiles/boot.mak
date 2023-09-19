@@ -20,10 +20,7 @@ defines = TARGET_IS_TM4C123_RB1 \
 		PART_TM4C123GH6PM \
 		gcc \
 
-includes = ${dependancy_path}/shared_libraries \
-			${dependancy_path}/shared_libraries/inc \
-			${dependancy_path}/shared_libraries/driverlib \
-			${dependancy_path}/shared_libraries/utils
+includes = ${dependancy_path}/shared_libraries 
 
 CFLAGS = -nostdlib \
 		--specs=nosys.specs \

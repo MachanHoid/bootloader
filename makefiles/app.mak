@@ -18,10 +18,7 @@ defines = TARGET_IS_TM4C123_RB1 \
 		PART_TM4C123GH6PM \
 		gcc \
 
-includes = ${dependancy_path}/shared_libraries \
-			${dependancy_path}/shared_libraries/inc \
-			${dependancy_path}/shared_libraries/driverlib \
-			${dependancy_path}/shared_libraries/utils
+includes = ${dependancy_path}/shared_libraries 
 
 SHAREDLIB_COMPILE_FLAGS = -nostdlib \
 						-mcpu=cortex-m4 \
@@ -87,7 +84,7 @@ gen_app_files: $(all_files_obj)
 #HARDCODING FOR NOW CHANGE LATER
 appfile_obj_dir = build/obj_temp/app_obj_temp/app.o
 startup_obj_dir = build/obj_temp/app_obj_temp/startup_gcc.o
-$(appfile_obj_dir) : src/boot.c
+$(appfile_obj_dir) : src/app.c
 	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $^ -o $@	
 
 $(startup_obj_dir) : startup/startup_gcc.c
@@ -100,6 +97,7 @@ link_app_raw: $(all_files_obj) $(sharedlib_obj)
 	$(linker) $(LFAGS) $^ -o build/outputs_temp/unopt_app.elf
 	
 # compare with shared.elf funcs
+# TODO: Change to only functions and not symbols
 optimise_dependancies:
 	arm-none-eabi-nm --format=posix build/outputs_temp/unopt_app.elf > build/helper_files_temp/app_files/unopt_app_funcs.txt
 	arm-none-eabi-nm --format=posix outputs/shared.elf > build/helper_files_temp/app_files/shared_funcs.txt

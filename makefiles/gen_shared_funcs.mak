@@ -13,7 +13,6 @@ AWK_PATH=/usr/bin/
 
 dependancy_path:= .
 
-# We should also have a JSON file where we can give the include paths 
 rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
 
 sharedlib_src_dir = shared_libraries
@@ -30,11 +29,7 @@ defines = TARGET_IS_TM4C123_RB1 \
 		PART_TM4C123GH6PM \
 		gcc \
 
-# Why are we doing this? Automate it??s
 includes = ${dependancy_path}/shared_libraries \
-			${dependancy_path}/shared_libraries/inc \
-			${dependancy_path}/shared_libraries/driverlib \
-			${dependancy_path}/shared_libraries/utils
 
 CFLAGS = -nostdlib \
 		--specs=nosys.specs \
@@ -64,7 +59,8 @@ compile_sharedlib: $(sharedlib_src)
 
 compile_bootloader: compile_bootloader_stage1 compile_bootloader_stage2 link_bootloader
 
-# What's this ? Why are we doing separately
+# This has to be automated for all the shared_libraries
+# TODO: Find all the directory names and do this - to create directories for object
 sharedlib_driverlib_dir = $(sharedlib_obj_dir)/driverlib
 
 compile_bootloader_stage1: $(sharedlib_obj_dir) $(sharedlib_driverlib_dir) $(sharedlib_obj) 
@@ -83,6 +79,7 @@ boot_files = $(project_file) $(startup_file)
 # NOT WORKING PLS CHECK - doing some jugaad for now
 # boot_obj = $(patsubst %/%.c, build/obj_temp/boot_obj_temp/%.o, $(boot_files))
 
+# TODO
 # Should not do this manually. Bootloader might be made up of several files on its own. 
 # Including them manually is wrong
 boot_obj = build/obj_temp/boot_obj_temp/boot.o build/obj_temp/boot_obj_temp/startup_gcc.o 
@@ -113,6 +110,8 @@ link_bootloader:
 
 LIB_NAME_DIR=$(dependancy_path)/build/outputs_temp
 
+
+#TODO: arm-none-eabi-nm gives all symbols. do something to get only the function names
 get_dependancies:
 	@echo generating helper files
 	arm-none-eabi-nm --format=posix ${LIB_NAME_DIR}/unopt_bootloader.elf > build/helper_files_temp/shared_files/unopt_bootloader_funcs.txt

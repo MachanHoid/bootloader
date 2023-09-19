@@ -16,6 +16,7 @@ while (app_element):
     app_funcs.add(app_element.split()[0])
     app_element = app.readline()
 
+#TODO: Change variable names 
 sharedanddriverlib = open(f'build/helper_files_temp/shared_files/sharedlib_funcs.txt')
 sharedanddriverlib_funcs = set()
 sharedanddriverlib_element = sharedanddriverlib.readline()

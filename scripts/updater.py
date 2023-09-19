@@ -3,7 +3,7 @@ import serial
 
 app_file = 'outputs/app.bin'
 # from time import delay
-ser = serial.Serial('/dev/tty.usbmodem0E23A66C1', 9600, timeout=1)
+ser = serial.Serial('/dev/tty.usbmodem0E2389181', 9600, timeout=1)
 while True:
     ser.write(b'\xff')
     ack = ser.read(1)
@@ -13,7 +13,7 @@ while True:
         break
 ser.close()
 
-ser2 = serial.Serial('/dev/tty.usbmodem0E23A66C1', 9600)
+ser2 = serial.Serial('/dev/tty.usbmodem0E2389181', 9600)
 print('Sending File length')
 with open(app_file, 'rb') as app:
     filebytes = app.read()
