@@ -14,6 +14,8 @@ create_build_dir:
 	@mkdir -p build/helper_files_temp
 	@mkdir -p build/helper_files_temp/shared_files
 	@mkdir -p build/helper_files_temp/app_files
+	@mkdir -p build/helper_files_temp/app_files/removesecs
+	@mkdir -p build/helper_files_temp/app_files/removesecs/driverlib
 
 	@mkdir -p outputs
 

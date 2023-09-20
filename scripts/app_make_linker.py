@@ -28,7 +28,7 @@ for i in linker_lines:
         new_linker += i
         new_linker += '\n/DISCARD/ :{'
         new_linker += '\n\t\t'
-        # new_linker += noFunctions
+        new_linker += noFunctions
         new_linker += '\n\t}\n'
         checkerDiscard = 1
     else:

@@ -57,7 +57,7 @@ link: $(sharedlib_obj)
 	@echo linking shared.elf
 	$(linker) $(CFLAGS) $^ -o $(elf_file)
 
-# TODO: do it only for functions. It does for all symbols? 
+# TODO: do it only for functions. It does for all symbols? no it does only for functions (T) 
 update_syms:
 	@echo syms file created with shared files
 	@ scripts/${addressTable} outputs/shared.elf build/linkers_temp/shared_syms.ld

@@ -116,5 +116,7 @@ get_dependancies:
 	@echo generating helper files
 	arm-none-eabi-nm --format=posix ${LIB_NAME_DIR}/unopt_bootloader.elf > build/helper_files_temp/shared_files/unopt_bootloader_funcs.txt
 	arm-none-eabi-nm --format=posix ${LIB_NAME_DIR}/unopt_shared.elf > build/helper_files_temp/shared_files/sharedlib_funcs.txt
+# arm-none-eabi-nm --format=posix ${LIB_NAME_DIR}/unopt_bootloader.elf | /usr/bin/awk '/ T / {print $$1}' > build/helper_files_temp/shared_files/unopt_bootloader_funcs.txt
+# arm-none-eabi-nm --format=posix ${LIB_NAME_DIR}/unopt_shared.elf | /usr/bin/awk '/ T / {print $$1}' > build/helper_files_temp/shared_files/sharedlib_funcs.txt
 	$(python) -u "scripts/shared_compare.py"
 	$(python) -u "scripts/shared_make_linker.py"

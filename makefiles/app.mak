@@ -48,7 +48,7 @@ LFAGS += --gc-sections
 
 CFLAGS =  -T $(new_linker_file) --gc-sections
 #------------------------------------------------------------------------
-all: compile_sharedlib gen_app_files link_app_raw  optimise_dependancies build_final
+all: compile_sharedlib gen_app_files link_app_raw  optimise_dependancies remove_shared_from_shared_lib build_final
 #------------------------------------------------------------------------
 # generate app + driverlib + shared
 # generate driver lib obj files
@@ -99,12 +99,21 @@ link_app_raw: $(all_files_obj) $(sharedlib_obj)
 # compare with shared.elf funcs
 # TODO: Change to only functions and not symbols
 optimise_dependancies:
-	arm-none-eabi-nm --format=posix build/outputs_temp/unopt_app.elf > build/helper_files_temp/app_files/unopt_app_funcs.txt
-	arm-none-eabi-nm --format=posix outputs/shared.elf > build/helper_files_temp/app_files/shared_funcs.txt
+	arm-none-eabi-nm --format=posix build/outputs_temp/unopt_app.elf> build/helper_files_temp/app_files/unopt_app_funcs.txt
+	arm-none-eabi-nm --format=posix outputs/shared.elf  > build/helper_files_temp/app_files/shared_funcs.txt
+# arm-none-eabi-nm --format=posix build/outputs_temp/unopt_app.elf | /usr/bin/awk '/ T / {print $$1}' > build/helper_files_temp/app_files/unopt_app_funcs.txt
+# arm-none-eabi-nm --format=posix outputs/shared.elf | /usr/bin/awk '/ T / {print $$1}' > build/helper_files_temp/app_files/shared_funcs.txt
 	$(python) -u "scripts/app_compare.py"
 	$(python) -u "scripts/app_make_linker.py"
 
+#remove the sections in shared from the sharedlib obj files using --remove-section
+remove_shared_from_shared_lib: $(sharedlib_obj)
+	@echo removing shared from sharedlib
+	$(python) -u "scripts/app_removesecs.py" $^
+
 #build the final file
 build_final: $(all_files_obj) $(sharedlib_obj) 
+	arm-none-eabi-objcopy --remove-section .text.SysCtlPeripheralEnable ./build/obj_temp/shared_libraries_obj_temp/driverlib/sysctl.o
+	arm-none-eabi-objcopy --remove-section .text.SysCtlPeripheralReady ./build/obj_temp/shared_libraries_obj_temp/driverlib/sysctl.o
 	$(linker) $(CFLAGS) $^ -o $(elf_file)
 	${ocpy} -O binary outputs/app.elf outputs/app.bin
