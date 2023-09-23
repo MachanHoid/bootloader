@@ -74,20 +74,11 @@ boot_folder_escaped = src\/boot
 boot_obj_dir_escaped = build\/obj_temp\/boot_obj_temp
 boot_obj = $(foreach i,$(boot_files), $(shell echo $(i) | sed 's/$(boot_folder_escaped)/$(boot_obj_dir_escaped)/1; s/\.c/\.o/'))
 
-startup_obj_dir = build/obj_temp/boot_obj_temp
-startup_folder_escaped = startup
-startup_obj_dir_escaped = build\/obj_temp\/boot_obj_temp
-startup_obj = $(foreach i,$(startup_files), $(shell echo $(i) | sed 's/$(startup_folder_escaped)/$(startup_obj_dir_escaped)/1; s/\.c/\.o/'))
-
-compile_bootloader_stage2: $(boot_obj) $(startup_obj)
+compile_bootloader_stage2: $(boot_obj)
 	@echo compiling main and startup
 	mkdir -p $(boot_obj_dir)
 
 $(boot_obj_dir)/%.o : $(boot_folder)/%.c
-	mkdir -p $(dir $@)	
-	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $^ -o $@
-
-$(startup_obj_dir)/%.o : $(startup_folder)/%.c
 	mkdir -p $(dir $@)	
 	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $^ -o $@
 

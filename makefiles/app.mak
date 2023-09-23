@@ -64,12 +64,7 @@ app_folder_escaped = src\/app
 app_obj_dir_escaped = build\/obj_temp\/app_obj_temp
 app_obj = $(foreach i,$(app_files), $(shell echo $(i) | sed 's/$(app_folder_escaped)/$(app_obj_dir_escaped)/1; s/\.c/\.o/'))
 
-startup_obj_dir = build/obj_temp/app_obj_temp
-startup_folder_escaped = startup
-startup_obj_dir_escaped = build\/obj_temp\/app_obj_temp
-startup_obj = $(foreach i,$(startup_files), $(shell echo $(i) | sed 's/$(startup_folder_escaped)/$(startup_obj_dir_escaped)/1; s/\.c/\.o/'))
-
-gen_app_files: $(app_obj) $(startup_obj)
+gen_app_files: $(app_obj) 
 	@echo compiling app and startup
 	mkdir -p $(app_obj_dir)
 
@@ -77,14 +72,11 @@ $(app_obj_dir)/%.o : $(app_folder)/%.c
 	mkdir -p $(dir $@)	
 	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $^ -o $@
 
-$(startup_obj_dir)/%.o : $(startup_folder)/%.c
-	mkdir -p $(dir $@)	
-	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $^ -o $@
 
 
 # kill dead code in this
 #linking
-link_app_raw: $(app_obj) $(startup_obj) $(sharedlib_obj)
+link_app_raw: $(app_obj)  $(sharedlib_obj)
 	$(linker) $(LFAGS) $^ -o build/outputs_temp/unopt_app.elf
 	
 # compare with shared.elf funcs
@@ -95,6 +87,6 @@ optimise_dependancies:
 	$(python) -u "scripts/app_make_linker.py"
 
 #build the final file
-build_final: $(app_obj) $(startup_obj) $(sharedlib_obj)
+build_final: $(app_obj)  $(sharedlib_obj)
 	$(linker) $(CFLAGS) $^ -o $(elf_file)
 	${ocpy} -O binary outputs/app.elf outputs/app.bin
