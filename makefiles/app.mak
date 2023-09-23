@@ -44,7 +44,6 @@ elf_file =  outputs/app.elf #final output
 #-------
 LFAGS = -T ${linker_file}
 LFAGS += --gc-sections
-# LFLAGS += --print-gc-sections
 
 CFLAGS =  -T $(new_linker_file) --gc-sections
 #------------------------------------------------------------------------
@@ -53,20 +52,12 @@ all: compile_sharedlib gen_app_files link_app_raw  optimise_dependancies build_f
 # generate app + driverlib + shared
 # generate driver lib obj files
 
-$(sharedlib_obj_dir)/%.o : $(sharedlib_src_dir)/%.c
-	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $< -o $@
-
-sharedlib_driverlib_dir = $(sharedlib_obj_dir)/driverlib
-
-compile_sharedlib: $(sharedlib_obj_dir) $(sharedlib_driverlib_dir) $(sharedlib_obj)
+compile_sharedlib: $(sharedlib_obj)
 	@echo compiling sharedlib
 
-$(sharedlib_obj_dir): 
-	mkdir -p $(sharedlib_obj_dir)
-
-$(sharedlib_driverlib_dir): 
-	mkdir -p $@
-
+$(sharedlib_obj_dir)/%.o : $(sharedlib_src_dir)/%.c
+	mkdir -p $(dir $@)
+	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $< -o $@
 
 # generate shared and app
 # gen_all_files : $(all_files_obj) 
@@ -97,7 +88,6 @@ link_app_raw: $(all_files_obj) $(sharedlib_obj)
 	$(linker) $(LFAGS) $^ -o build/outputs_temp/unopt_app.elf
 	
 # compare with shared.elf funcs
-# TODO: Change to only functions and not symbols
 optimise_dependancies:
 	arm-none-eabi-nm --format=posix build/outputs_temp/unopt_app.elf > build/helper_files_temp/app_files/unopt_app_funcs.txt
 	arm-none-eabi-nm --format=posix outputs/shared.elf > build/helper_files_temp/app_files/shared_funcs.txt

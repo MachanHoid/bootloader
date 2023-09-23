@@ -32,20 +32,12 @@ addressTable = gen_address_table.sh
 
 all: compile_sharedlib link update_syms
 
-$(sharedlib_obj_dir)/%.o : $(sharedlib_src_dir)/%.c
-	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $< -o $@
-
-#TODO: Change here also
-sharedlib_driverlib_dir = $(sharedlib_obj_dir)/driverlib
-
-compile_sharedlib: $(sharedlib_obj_dir) $(sharedlib_driverlib_dir) $(sharedlib_obj)
+compile_sharedlib: $(sharedlib_obj)
 	@echo compiling sharedlib
 
-$(sharedlib_obj_dir): 
-	mkdir -p $(sharedlib_obj_dir)
-
-$(sharedlib_driverlib_dir): 
-	mkdir -p $@
+$(sharedlib_obj_dir)/%.o : $(sharedlib_src_dir)/%.c
+	mkdir -p $(dir $@)
+	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $< -o $@
 
 linker_file = build/linkers_temp/shared_linker_new.ld
 elf_file = outputs/shared.elf
@@ -57,7 +49,6 @@ link: $(sharedlib_obj)
 	@echo linking shared.elf
 	$(linker) $(CFLAGS) $^ -o $(elf_file)
 
-# TODO: do it only for functions. It does for all symbols? 
 update_syms:
 	@echo syms file created with shared files
 	@ scripts/${addressTable} outputs/shared.elf build/linkers_temp/shared_syms.ld

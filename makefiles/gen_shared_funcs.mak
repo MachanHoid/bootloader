@@ -13,14 +13,6 @@ AWK_PATH=/usr/bin/
 
 dependancy_path:= .
 
-rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
-
-sharedlib_src_dir = shared_libraries
-sharedlib_src = $(call rwildcard, ./$(sharedlib_src_dir), *.c)
-
-sharedlib_obj_dir = build/obj_temp/shared_libraries_obj_temp
-sharedlib_obj = $(patsubst ./$(sharedlib_src_dir)/%.c, ./$(sharedlib_obj_dir)/%.o, $(sharedlib_src))
-
 .PHONY: all  
 
 all:makeBuildDir compile_sharedlib compile_bootloader get_dependancies
@@ -50,6 +42,14 @@ SHAREDLIB_COMPILE_FLAGS = -nostdlib \
 SHAREDLIB_COMPILE_FLAGS += $(foreach i,$(includes),-I$(i))
 SHAREDLIB_COMPILE_FLAGS += $(foreach d,$(defines),-D $(d))
 
+rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
+
+sharedlib_src_dir = shared_libraries
+sharedlib_src = $(call rwildcard, ./$(sharedlib_src_dir), *.c)
+
+sharedlib_obj_dir = build/obj_temp/shared_libraries_obj_temp
+sharedlib_obj = $(patsubst ./$(sharedlib_src_dir)/%.c, ./$(sharedlib_obj_dir)/%.o, $(sharedlib_src))
+
 makeBuildDir: 
 	mkdir -p build/obj_temp/shared_libraries_obj_temp
 
@@ -59,20 +59,11 @@ compile_sharedlib: $(sharedlib_src)
 
 compile_bootloader: compile_bootloader_stage1 compile_bootloader_stage2 link_bootloader
 
-# This has to be automated for all the shared_libraries
-# TODO: Find all the directory names and do this - to create directories for object
-sharedlib_driverlib_dir = $(sharedlib_obj_dir)/driverlib
-
-compile_bootloader_stage1: $(sharedlib_obj_dir) $(sharedlib_driverlib_dir) $(sharedlib_obj) 
+compile_bootloader_stage1: $(sharedlib_obj) 
 	@echo compiling shared_libraries for bootloader
 
-$(sharedlib_obj_dir): 
-	mkdir -p $(sharedlib_obj_dir)
-
-$(sharedlib_driverlib_dir): 
-	mkdir -p $@
-
 $(sharedlib_obj_dir)/%.o : $(sharedlib_src_dir)/%.c
+	mkdir -p $(dir $@)
 	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $< -o $@
 
 boot_files = $(project_file) $(startup_file)
@@ -111,7 +102,6 @@ link_bootloader:
 LIB_NAME_DIR=$(dependancy_path)/build/outputs_temp
 
 
-#TODO: arm-none-eabi-nm gives all symbols. do something to get only the function names
 get_dependancies:
 	@echo generating helper files
 	arm-none-eabi-nm --format=posix ${LIB_NAME_DIR}/unopt_bootloader.elf > build/helper_files_temp/shared_files/unopt_bootloader_funcs.txt
