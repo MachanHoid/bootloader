@@ -1,7 +1,11 @@
 linker_file = linkers/boot_linker.ld
 new_linker_file = build/linkers_temp/boot_linker_new.ld
-startup_file = startup/startup_gcc.c
-project_file = src/boot.c
+boot_folder = src/boot
+startup_folder = startup
+
+rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
+boot_files = $(call rwildcard, ./$(boot_folder), *.c) 
+startup_files = $(call rwildcard, ./$(startup_folder), *.c) 
 
 compiler = arm-none-eabi-gcc
 assembler = arm-none-eabi-as
@@ -36,7 +40,7 @@ make_new_linker:
 	@cp $(linker_file) $(new_linker_file)
 	@echo 'INCLUDE build/linkers_temp/shared_syms.ld' >> $(new_linker_file)
 
-compile: ${project_file} ${startup_file}
+compile: ${boot_files} ${startup_files}
 	@echo compiling
 	${compiler} ${CFLAGS}  $^ -o outputs/boot.elf
 	${ocpy} -O binary outputs/boot.elf outputs/boot.bin

@@ -1,6 +1,6 @@
 linker_file = linkers/shared_linker.ld
-project_file = src/boot.c
-startup_file = startup/startup_gcc.c
+boot_folder = src/boot
+startup_folder = startup
 
 
 compiler = arm-none-eabi-gcc
@@ -13,7 +13,18 @@ AWK_PATH=/usr/bin/
 
 dependancy_path:= .
 
-.PHONY: all  
+rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
+
+sharedlib_src_dir = shared_libraries
+sharedlib_src = $(call rwildcard, ./$(sharedlib_src_dir), *.c)
+
+sharedlib_obj_dir = build/obj_temp/shared_libraries_obj_temp
+sharedlib_obj = $(patsubst ./$(sharedlib_src_dir)/%.c, ./$(sharedlib_obj_dir)/%.o, $(sharedlib_src))
+
+boot_files = $(call rwildcard, ./$(boot_folder), *.c) 
+startup_files = $(call rwildcard, ./$(startup_folder), *.c) 
+
+.PHONY: all 
 
 all:makeBuildDir compile_sharedlib compile_bootloader get_dependancies
 
@@ -42,15 +53,7 @@ SHAREDLIB_COMPILE_FLAGS = -nostdlib \
 SHAREDLIB_COMPILE_FLAGS += $(foreach i,$(includes),-I$(i))
 SHAREDLIB_COMPILE_FLAGS += $(foreach d,$(defines),-D $(d))
 
-rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
-
-sharedlib_src_dir = shared_libraries
-sharedlib_src = $(call rwildcard, ./$(sharedlib_src_dir), *.c)
-
-sharedlib_obj_dir = build/obj_temp/shared_libraries_obj_temp
-sharedlib_obj = $(patsubst ./$(sharedlib_src_dir)/%.c, ./$(sharedlib_obj_dir)/%.o, $(sharedlib_src))
-
-makeBuildDir: 
+makeBuildDir:
 	mkdir -p build/obj_temp/shared_libraries_obj_temp
 
 compile_sharedlib: $(sharedlib_src)
@@ -66,38 +69,34 @@ $(sharedlib_obj_dir)/%.o : $(sharedlib_src_dir)/%.c
 	mkdir -p $(dir $@)
 	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $< -o $@
 
-boot_files = $(project_file) $(startup_file)
-# NOT WORKING PLS CHECK - doing some jugaad for now
-# boot_obj = $(patsubst %/%.c, build/obj_temp/boot_obj_temp/%.o, $(boot_files))
+boot_obj_dir = build/obj_temp/boot_obj_temp
+boot_folder_escaped = src\/boot
+boot_obj_dir_escaped = build\/obj_temp\/boot_obj_temp
+boot_obj = $(foreach i,$(boot_files), $(shell echo $(i) | sed 's/$(boot_folder_escaped)/$(boot_obj_dir_escaped)/1; s/\.c/\.o/'))
 
-# TODO
-# Should not do this manually. Bootloader might be made up of several files on its own. 
-# Including them manually is wrong
-boot_obj = build/obj_temp/boot_obj_temp/boot.o build/obj_temp/boot_obj_temp/startup_gcc.o 
-boot_obj_dir = build/obj_temp/boot_obj_temp 
+startup_obj_dir = build/obj_temp/boot_obj_temp
+startup_folder_escaped = startup
+startup_obj_dir_escaped = build\/obj_temp\/boot_obj_temp
+startup_obj = $(foreach i,$(startup_files), $(shell echo $(i) | sed 's/$(startup_folder_escaped)/$(startup_obj_dir_escaped)/1; s/\.c/\.o/'))
 
-compile_bootloader_stage2: $(boot_obj) $(boot_obj_dir)
+compile_bootloader_stage2: $(boot_obj) $(startup_obj)
 	@echo compiling main and startup
-	@echo $(boot_obj)
-
-$(boot_obj_dir):
 	mkdir -p $(boot_obj_dir)
-	
-#hardcoding for 2 files right now
-bootfile_obj_dir = build/obj_temp/boot_obj_temp/boot.o
-startup_obj_dir = build/obj_temp/boot_obj_temp/startup_gcc.o
-$(bootfile_obj_dir) : src/boot.c
-	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $^ -o $@	
 
-$(startup_obj_dir) : startup/startup_gcc.c
-	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $^ -o $@	
+$(boot_obj_dir)/%.o : $(boot_folder)/%.c
+	mkdir -p $(dir $@)	
+	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $^ -o $@
+
+$(startup_obj_dir)/%.o : $(startup_folder)/%.c
+	mkdir -p $(dir $@)	
+	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $^ -o $@
 
 LFAGS = -T ${linker_file}
 LFAGS += --gc-sections
 
-link_bootloader: 
+link_bootloader: $(boot_obj) $(startup_obj) $(sharedlib_obj) 
 	@echo linking bootloader
-	$(linker) $(LFAGS) $(boot_obj) $(sharedlib_obj) -o build/outputs_temp/unopt_bootloader.elf 
+	$(linker) $(LFAGS) $^ -o build/outputs_temp/unopt_bootloader.elf 
 
 LIB_NAME_DIR=$(dependancy_path)/build/outputs_temp
 

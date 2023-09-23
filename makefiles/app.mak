@@ -4,9 +4,14 @@ linker = arm-none-eabi-ld
 ocpy = arm-none-eabi-objcopy
 python = python3
 
-dependancy_path = .
+app_folder = src/app
+startup_folder = startup
 
 rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
+app_files = $(call rwildcard, ./$(app_folder), *.c) 
+startup_files = $(call rwildcard, ./$(startup_folder), *.c) 
+
+dependancy_path = .
 
 sharedlib_src_dir = shared_libraries
 sharedlib_src = $(call rwildcard, ./$(sharedlib_src_dir), *.c)
@@ -33,11 +38,6 @@ addressTable = gen_address_table.sh
 
 
 #-----------------------------------------------------------------------
-app_file = $(dependancy_path)/src/app.c
-startup_file = $(dependancy_path)/startup/startup_gcc.c
-all_files = $(app_file) $(startup_file)
-#HARDCODING THIS, CHANGE LATER
-all_files_obj = build/obj_temp/app_obj_temp/app.o build/obj_temp/app_obj_temp/startup_gcc.o 
 linker_file = linkers/app_linker.ld
 new_linker_file = build/linkers_temp/app_linker_new.ld
 elf_file =  outputs/app.elf #final output
@@ -59,32 +59,32 @@ $(sharedlib_obj_dir)/%.o : $(sharedlib_src_dir)/%.c
 	mkdir -p $(dir $@)
 	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $< -o $@
 
-# generate shared and app
-# gen_all_files : $(all_files_obj) 
-# 	@echo all obj files are : $(all_files_obj)
-#NOT WORKING 
-# $(all_files_obj) : %.o : %.c
-# 	@echo all_files_obj compiling
-# 	$(compiler) $(DRIVERLIB_COMPILE_FLAGS) $< -o $@
-#FIX (this also not working goppa mavane):
-# $(app_file: %.c=%.o) : $(app_file)
-# 	$(compiler) $(DRIVERLIB_COMPILE_FLAGS) $< -o $@
-# $(shared_file: %.c=%.o) : $(shared_file)
-# 	$(compiler) $(DRIVERLIB_COMPILE_FLAGS) $< -o $@
-gen_app_files: $(all_files_obj)
-#HARDCODING FOR NOW CHANGE LATER
-appfile_obj_dir = build/obj_temp/app_obj_temp/app.o
-startup_obj_dir = build/obj_temp/app_obj_temp/startup_gcc.o
-$(appfile_obj_dir) : src/app.c
-	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $^ -o $@	
+app_obj_dir = build/obj_temp/app_obj_temp
+app_folder_escaped = src\/app
+app_obj_dir_escaped = build\/obj_temp\/app_obj_temp
+app_obj = $(foreach i,$(app_files), $(shell echo $(i) | sed 's/$(app_folder_escaped)/$(app_obj_dir_escaped)/1; s/\.c/\.o/'))
 
-$(startup_obj_dir) : startup/startup_gcc.c
-	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $^ -o $@	
+startup_obj_dir = build/obj_temp/app_obj_temp
+startup_folder_escaped = startup
+startup_obj_dir_escaped = build\/obj_temp\/app_obj_temp
+startup_obj = $(foreach i,$(startup_files), $(shell echo $(i) | sed 's/$(startup_folder_escaped)/$(startup_obj_dir_escaped)/1; s/\.c/\.o/'))
+
+gen_app_files: $(app_obj) $(startup_obj)
+	@echo compiling app and startup
+	mkdir -p $(app_obj_dir)
+
+$(app_obj_dir)/%.o : $(app_folder)/%.c
+	mkdir -p $(dir $@)	
+	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $^ -o $@
+
+$(startup_obj_dir)/%.o : $(startup_folder)/%.c
+	mkdir -p $(dir $@)	
+	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $^ -o $@
 
 
 # kill dead code in this
 #linking
-link_app_raw: $(all_files_obj) $(sharedlib_obj)
+link_app_raw: $(app_obj) $(startup_obj) $(sharedlib_obj)
 	$(linker) $(LFAGS) $^ -o build/outputs_temp/unopt_app.elf
 	
 # compare with shared.elf funcs
@@ -95,6 +95,6 @@ optimise_dependancies:
 	$(python) -u "scripts/app_make_linker.py"
 
 #build the final file
-build_final: $(all_files_obj) $(sharedlib_obj) 
+build_final: $(app_obj) $(startup_obj) $(sharedlib_obj)
 	$(linker) $(CFLAGS) $^ -o $(elf_file)
 	${ocpy} -O binary outputs/app.elf outputs/app.bin
