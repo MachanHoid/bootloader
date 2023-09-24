@@ -341,7 +341,7 @@ IntRegister(uint32_t ui32Interrupt, void (*pfnHandler)(void))
         //
         HWREG(NVIC_VTABLE) = (uint32_t)g_pfnRAMVectors;
     }
-
+    
     //
     // Save the interrupt handler.
     //

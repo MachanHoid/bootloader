@@ -5,7 +5,7 @@ ocpy = arm-none-eabi-objcopy
 python = python3
 
 app_folder = src/app
-startup_folder = startup
+startup_folder = src/app/startup
 
 rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
 app_files = $(call rwildcard, ./$(app_folder), *.c) 

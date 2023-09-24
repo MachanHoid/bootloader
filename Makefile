@@ -32,9 +32,11 @@ app:
 
 upload_bootloader:
 	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program outputs/boot.elf verify reset exit"
+	echo uploaded_bootloader
 
 upload_shared:
 	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program outputs/shared.elf verify reset exit"
+	echo uploaded_bootloader
 	
 transmit_app:
 	python3 -u "${dependancy_path}/${updater_file}" 

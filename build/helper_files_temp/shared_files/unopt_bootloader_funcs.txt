@@ -1,0 +1,61 @@
+__approm_size__ A 10000 
+approm_size D 20000004 4
+__approm_start__ T 30000 
+approm_start D 20000000 4
+__bootrom_size__ A 18000 
+bootrom_size D 2000000c 4
+__bootrom_start__ T 0 
+bootrom_start D 20000008 4
+branch_to_app t 182e0 1c
+_bss B 20000010 
+_data D 20000000 
+delay T 18f80 2a
+_ebss B 20000110 
+_edata D 20000010 
+erase_approm T 18344 4c
+_etext T 194bc 
+FaultISR t 18560 8
+FlashErase T 18570 60
+FlashProgram T 185d0 b4
+g_pfnVectors T 18000 26c
+GPIODirModeSet T 18684 76
+GPIOPadConfigSet T 186fc 2dc
+GPIOPinConfigure T 18a5c 84
+GPIOPinTypeGPIOOutput T 18a02 2c
+GPIOPinTypeUART T 18a2e 2c
+GPIOPinWrite T 189d8 2a
+g_pppui32XTALtoVCO t 192d4 1b0
+g_ppui32GPIOIntMapBlizzard t 19038 c0
+g_ppui32GPIOIntMapSnowflake t 190fc d8
+g_pui32GPIOBaseAddrs t 191d8 90
+g_pui32VCOFrequencies t 194b4 8
+g_pui32Xtals t 19268 6c
+g_sXTALtoMEMTIM t 19484 30
+g_ui32GPIOIntMapBlizzardRows t 190f8 4
+g_ui32GPIOIntMapSnowflakeRows t 191d4 4
+IntDefaultHandler t 18568 8
+_ldata A 194bc 
+led_off T 19014 24
+led_on T 18ff0 24
+led_setup T 18fac 44
+main T 18390 15c
+NmiSR t 18558 8
+pui32Stack b 20000010 100
+ResetISR T 184ec 64
+__shared_size__ A 18000 
+__shared_start__ T 18000 
+start_app T 182fc 48
+SysCtlClockGet T 18bd8 214
+SysCtlPeripheralDisable T 18b88 50
+SysCtlPeripheralEnable T 18b38 50
+SysCtlPeripheralReady T 18ae0 58
+_text T 18000 
+UARTCharGet T 18f2a 28
+UARTCharGetNonBlocking T 18efe 2c
+UARTCharPut T 18f52 2e
+UARTConfigSetExpClk T 18dec 92
+uart_deinit T 182b8 28
+UARTDisable T 18eb6 48
+UARTEnable T 18e7e 38
+uart_init t 1826c 4c
+zero_loop t 1851c 

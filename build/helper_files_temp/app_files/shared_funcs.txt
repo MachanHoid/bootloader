@@ -1,0 +1,75 @@
+__approm_size__ A 10000 
+__approm_start__ T 30000 
+__bootrom_size__ A 18000 
+__bootrom_start__ T 0 
+_bss B 2000026c 
+_data D 20000000 
+delay T 189b2 2a
+_ebss B 20000272 
+_edata D 2000026c 
+_etext T 19a0c 
+FlashErase T 182c0 60
+FlashProgram T 18320 b4
+g_i8I2CIntMapRows t 18ddc 4
+g_i8I2CIntMapSnowflakeRows t 18e30 4
+g_pfnRAMVectors d 20000000 26c
+g_pi16MIIClockDiv t 18ae4 18
+GPIODirModeSet T 1893c 76
+GPIOPadConfigSet T 18574 2dc
+GPIOPinConfigure T 1823c 84
+GPIOPinTypeGPIOOutput T 18a98 2c
+GPIOPinTypeUART T 18910 2c
+GPIOPinWrite T 18a6e 2a
+g_pppui32XTALtoVCO t 196f4 1b0
+g_ppui32GPIOIntMapBlizzard t 18b7c c0
+g_ppui32GPIOIntMapSnowflake t 18c40 d8
+g_ppui32I2CIntMap t 18dac 30
+g_ppui32I2CIntMapSnowflake t 18de0 50
+g_ppui32SSIIntMap t 18f40 20
+g_ppui32SSIIntMapSnowflake t 18f64 20
+g_ppui32TimerIntMap t 198dc 60
+g_ppui32TimerIntMapSnowflake t 19940 40
+g_ppui32UARTIntMap t 19984 40
+g_ppui32UARTIntMapSnowflake t 199c8 40
+g_pui16Crc16 t 19088 200
+g_pui32Crc32 t 19288 400
+g_pui32Dii16Regs t 18f04 14
+g_pui32EnRegs t 18ef0 14
+g_pui32FMPPERegs t 18afc 40
+g_pui32FMPRERegs t 18b3c 40
+g_pui32GPIOBaseAddrs t 18d1c 90
+g_pui32PendRegs t 18f18 14
+g_pui32Priority t 18e34 20
+g_pui32Regs t 18e54 9c
+g_pui32UnpendRegs t 18f2c 14
+g_pui32VCOFrequencies t 198d4 8
+g_pui32Xtals t 19688 6c
+g_pui8Crc8CCITT t 18f88 100
+g_pui8OversampleFactor b 2000026c 6
+g_sXTALtoMEMTIM t 198a4 30
+g_ui16CANBitValues t 18ac4 20
+g_ui32GPIOIntMapBlizzardRows t 18c3c 4
+g_ui32GPIOIntMapSnowflakeRows t 18d18 4
+g_ui8SSIIntMapRows t 18f60 4
+g_ui8SSIIntMapSnowflakeRows t 18f84 4
+g_ui8TimerIntMapRows t 1993c 4
+g_ui8TimerIntMapRowsSnowflake t 19980 4
+g_ui8UARTIntMapRows t 199c4 4
+g_ui8UARTIntMapRowsSnowflake t 19a08 4
+_ldata A 19a0c 
+led_off T 184c8 24
+led_on T 184a4 24
+led_setup T 188cc 44
+__shared_size__ A 18000 
+__shared_start__ T 18000 
+SysCtlClockGet T 18000 214
+SysCtlPeripheralDisable T 1887c 50
+SysCtlPeripheralEnable T 1841c 50
+SysCtlPeripheralReady T 184ec 58
+_text T 18000 
+UARTCharGet T 18214 28
+UARTCharGetNonBlocking T 18850 2c
+UARTCharPut T 18544 2e
+UARTConfigSetExpClk T 189dc 92
+UARTDisable T 183d4 48
+UARTEnable T 1846c 38

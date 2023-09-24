@@ -1,7 +1,7 @@
 import time
 import serial
 
-port = '/dev/tty.usbmodem0E23A66C1'
+port = '/dev/ttyACM0'
 
 app_file = 'outputs/app.bin'
 # from time import delay
