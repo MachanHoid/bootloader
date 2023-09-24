@@ -9,11 +9,11 @@ bootrom_start D 20000274 4
 branch_to_app t 182e0 1c
 _bss B 2000027c 
 _data D 20000000 
-delay T 1903c 2a
+delay T 1907c 2a
 _ebss B 2000037c 
 _edata D 2000027c 
 erase_approm T 18344 4c
-_etext T 19578 
+_etext T 195b8 
 FaultISR t 18560 8
 FlashErase T 18570 60
 FlashProgram T 185d0 b4
@@ -25,21 +25,21 @@ GPIOPinConfigure T 18a5c 84
 GPIOPinTypeGPIOOutput T 18a02 2c
 GPIOPinTypeUART T 18a2e 2c
 GPIOPinWrite T 189d8 2a
-g_pppui32XTALtoVCO t 19390 1b0
-g_ppui32GPIOIntMapBlizzard t 190f4 c0
-g_ppui32GPIOIntMapSnowflake t 191b8 d8
-g_pui32GPIOBaseAddrs t 19294 90
-g_pui32VCOFrequencies t 19570 8
-g_pui32Xtals t 19324 6c
-g_sXTALtoMEMTIM t 19540 30
-g_ui32GPIOIntMapBlizzardRows t 191b4 4
-g_ui32GPIOIntMapSnowflakeRows t 19290 4
+g_pppui32XTALtoVCO t 193d0 1b0
+g_ppui32GPIOIntMapBlizzard t 19134 c0
+g_ppui32GPIOIntMapSnowflake t 191f8 d8
+g_pui32GPIOBaseAddrs t 192d4 90
+g_pui32VCOFrequencies t 195b0 8
+g_pui32Xtals t 19364 6c
+g_sXTALtoMEMTIM t 19580 30
+g_ui32GPIOIntMapBlizzardRows t 191f4 4
+g_ui32GPIOIntMapSnowflakeRows t 192d0 4
 IntDefaultHandler t 18568 8
-IntRegister T 18ae0 bc
-_ldata A 19578 
-led_off T 190d0 24
-led_on T 190ac 24
-led_setup T 19068 44
+IntRegister T 18ae0 fc
+_ldata A 195b8 
+led_off T 19110 24
+led_on T 190ec 24
+led_setup T 190a8 44
 main T 18390 15c
 NmiSR t 18558 8
 pui32Stack b 2000027c 100
@@ -47,17 +47,17 @@ ResetISR T 184ec 64
 __shared_size__ A 18000 
 __shared_start__ T 18000 
 start_app T 182fc 48
-SysCtlClockGet T 18c94 214
-SysCtlPeripheralDisable T 18c44 50
-SysCtlPeripheralEnable T 18bf4 50
-SysCtlPeripheralReady T 18b9c 58
+SysCtlClockGet T 18cd4 214
+SysCtlPeripheralDisable T 18c84 50
+SysCtlPeripheralEnable T 18c34 50
+SysCtlPeripheralReady T 18bdc 58
 _text T 18000 
-UARTCharGet T 18fe6 28
-UARTCharGetNonBlocking T 18fba 2c
-UARTCharPut T 1900e 2e
-UARTConfigSetExpClk T 18ea8 92
+UARTCharGet T 19026 28
+UARTCharGetNonBlocking T 18ffa 2c
+UARTCharPut T 1904e 2e
+UARTConfigSetExpClk T 18ee8 92
 uart_deinit T 182b8 28
-UARTDisable T 18f72 48
-UARTEnable T 18f3a 38
+UARTDisable T 18fb2 48
+UARTEnable T 18f7a 38
 uart_init t 1826c 4c
 zero_loop t 1851c 

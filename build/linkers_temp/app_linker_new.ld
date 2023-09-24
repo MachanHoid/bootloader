@@ -7,15 +7,15 @@ SECTIONS
         _text = .;
         KEEP(*(.isr_vector))
 
-		*(.text.FaultISR)
-		*(.text.IntDefaultHandler)
-		*(.text.NmiSR)
-		*(.text.zero_loop)
-		*(.text.ResetISR)
 		*(.text.g_pfnVectors)
-		*(.text.Delay)
 		*(.text.main)
 		*(.text.pui32Stack)
+		*(.text.Delay)
+		*(.text.IntDefaultHandler)
+		*(.text.ResetISR)
+		*(.text.zero_loop)
+		*(.text.FaultISR)
+		*(.text.NmiSR)
         *(.rodata*)
         _etext = .;
     } > APPROM 

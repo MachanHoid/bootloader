@@ -1,9 +1,9 @@
-FaultISR
-IntDefaultHandler
-NmiSR
-zero_loop
-ResetISR
 g_pfnVectors
-Delay
 main
 pui32Stack
+Delay
+IntDefaultHandler
+ResetISR
+zero_loop
+FaultISR
+NmiSR

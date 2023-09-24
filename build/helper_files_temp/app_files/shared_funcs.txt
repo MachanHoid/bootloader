@@ -4,73 +4,73 @@ __bootrom_size__ A 18000
 __bootrom_start__ T 0 
 _bss B 2000026c 
 _data D 20000000 
-delay T 185dc 2a
+delay T 180d6 2a
 _ebss B 20000272 
 _edata D 2000026c 
-_etext T 19acc 
-FlashErase T 18000 60
-FlashProgram T 189d0 b4
-g_i8I2CIntMapRows t 18e9c 4
-g_i8I2CIntMapSnowflakeRows t 18ef0 4
+_etext T 19b0c 
+FlashErase T 18aa0 60
+FlashProgram T 18424 b4
+g_i8I2CIntMapRows t 18edc 4
+g_i8I2CIntMapSnowflakeRows t 18f30 4
 g_pfnRAMVectors d 20000000 26c
-g_pi16MIIClockDiv t 18ba4 18
-GPIODirModeSet T 18746 76
-GPIOPadConfigSet T 18060 2dc
-GPIOPinConfigure T 18adc 84
-GPIOPinTypeGPIOOutput T 183a0 2c
-GPIOPinTypeUART T 1833c 2c
-GPIOPinWrite T 184b0 2a
-g_pppui32XTALtoVCO t 197b4 1b0
-g_ppui32GPIOIntMapBlizzard t 18c3c c0
-g_ppui32GPIOIntMapSnowflake t 18d00 d8
-g_ppui32I2CIntMap t 18e6c 30
-g_ppui32I2CIntMapSnowflake t 18ea0 50
-g_ppui32SSIIntMap t 19000 20
-g_ppui32SSIIntMapSnowflake t 19024 20
-g_ppui32TimerIntMap t 1999c 60
-g_ppui32TimerIntMapSnowflake t 19a00 40
-g_ppui32UARTIntMap t 19a44 40
-g_ppui32UARTIntMapSnowflake t 19a88 40
-g_pui16Crc16 t 19148 200
-g_pui32Crc32 t 19348 400
-g_pui32Dii16Regs t 18fc4 14
-g_pui32EnRegs t 18fb0 14
-g_pui32FMPPERegs t 18bbc 40
-g_pui32FMPRERegs t 18bfc 40
-g_pui32GPIOBaseAddrs t 18ddc 90
-g_pui32PendRegs t 18fd8 14
-g_pui32Priority t 18ef4 20
-g_pui32Regs t 18f14 9c
-g_pui32UnpendRegs t 18fec 14
-g_pui32VCOFrequencies t 19994 8
-g_pui32Xtals t 19748 6c
-g_pui8Crc8CCITT t 19048 100
+g_pi16MIIClockDiv t 18be4 18
+GPIODirModeSet T 186a8 76
+GPIOPadConfigSet T 18124 2dc
+GPIOPinConfigure T 18720 84
+GPIOPinTypeGPIOOutput T 18000 2c
+GPIOPinTypeUART T 180aa 2c
+GPIOPinWrite T 185d4 2a
+g_pppui32XTALtoVCO t 197f4 1b0
+g_ppui32GPIOIntMapBlizzard t 18c7c c0
+g_ppui32GPIOIntMapSnowflake t 18d40 d8
+g_ppui32I2CIntMap t 18eac 30
+g_ppui32I2CIntMapSnowflake t 18ee0 50
+g_ppui32SSIIntMap t 19040 20
+g_ppui32SSIIntMapSnowflake t 19064 20
+g_ppui32TimerIntMap t 199dc 60
+g_ppui32TimerIntMapSnowflake t 19a40 40
+g_ppui32UARTIntMap t 19a84 40
+g_ppui32UARTIntMapSnowflake t 19ac8 40
+g_pui16Crc16 t 19188 200
+g_pui32Crc32 t 19388 400
+g_pui32Dii16Regs t 19004 14
+g_pui32EnRegs t 18ff0 14
+g_pui32FMPPERegs t 18bfc 40
+g_pui32FMPRERegs t 18c3c 40
+g_pui32GPIOBaseAddrs t 18e1c 90
+g_pui32PendRegs t 19018 14
+g_pui32Priority t 18f34 20
+g_pui32Regs t 18f54 9c
+g_pui32UnpendRegs t 1902c 14
+g_pui32VCOFrequencies t 199d4 8
+g_pui32Xtals t 19788 6c
+g_pui8Crc8CCITT t 19088 100
 g_pui8OversampleFactor b 2000026c 6
-g_sXTALtoMEMTIM t 19964 30
-g_ui16CANBitValues t 18b84 20
-g_ui32GPIOIntMapBlizzardRows t 18cfc 4
-g_ui32GPIOIntMapSnowflakeRows t 18dd8 4
-g_ui8SSIIntMapRows t 19020 4
-g_ui8SSIIntMapSnowflakeRows t 19044 4
-g_ui8TimerIntMapRows t 199fc 4
-g_ui8TimerIntMapRowsSnowflake t 19a40 4
-g_ui8UARTIntMapRows t 19a84 4
-g_ui8UARTIntMapRowsSnowflake t 19ac8 4
-IntRegister T 1865c bc
-_ldata A 19acc 
-led_off T 18b60 24
-led_on T 18520 24
-led_setup T 184dc 44
+g_sXTALtoMEMTIM t 199a4 30
+g_ui16CANBitValues t 18bc4 20
+g_ui32GPIOIntMapBlizzardRows t 18d3c 4
+g_ui32GPIOIntMapSnowflakeRows t 18e18 4
+g_ui8SSIIntMapRows t 19060 4
+g_ui8SSIIntMapSnowflakeRows t 19084 4
+g_ui8TimerIntMapRows t 19a3c 4
+g_ui8TimerIntMapRowsSnowflake t 19a80 4
+g_ui8UARTIntMapRows t 19ac4 4
+g_ui8UARTIntMapRowsSnowflake t 19b08 4
+IntRegister T 184d8 fc
+_ldata A 19b0c 
+led_off T 18100 24
+led_on T 18400 24
+led_setup T 18b38 44
 __shared_size__ A 18000 
 __shared_start__ T 18000 
-SysCtlClockGet T 187bc 214
-SysCtlPeripheralDisable T 1858c 50
-SysCtlPeripheralEnable T 18460 50
-SysCtlPeripheralReady T 18a84 58
+SysCtlClockGet T 187f8 214
+SysCtlPeripheralDisable T 18600 50
+SysCtlPeripheralEnable T 1802c 50
+SysCtlPeripheralReady T 18650 58
 _text T 18000 
-UARTCharGet T 18632 28
-UARTCharGetNonBlocking T 18606 2c
-UARTCharPut T 18718 2e
-UARTConfigSetExpClk T 183cc 92
-UARTDisable T 18544 48
-UARTEnable T 18368 38
+UARTCharGet T 187d0 28
+UARTCharGetNonBlocking T 187a4 2c
+UARTCharPut T 1807c 2e
+UARTConfigSetExpClk T 18a0c 92
+UARTDisable T 18b7c 48
+UARTEnable T 18b00 38
