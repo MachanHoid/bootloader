@@ -2,21 +2,29 @@ __approm_size__ A 10000
 __approm_start__ T 30000 
 __bootrom_size__ A 18000 
 __bootrom_start__ T 0 
-_bss B 20000000 
-_data T 20000000 
+_bss B 2000026c 
+_data D 20000000 
 Delay T 302ec 2c
-_ebss B 20000100 
-_edata T 20000000 
-_etext T 3039c 
+_ebss B 2000036c 
+_edata D 2000026c 
+_etext T 308ac 
 FaultISR t 3038c 8
+g_pfnRAMVectors d 20000000 26c
 g_pfnVectors T 30000 26c
+GPIODirModeSet T 3039c 76
+GPIOPadConfigSet T 30414 2dc
+GPIOPinTypeGPIOOutput T 3071a 2c
+GPIOPinWrite T 306f0 2a
 IntDefaultHandler t 30394 8
-_ldata A 3039c 
+IntRegister T 30748 bc
+_ldata A 308ac 
 main T 3026c 80
 NmiSR t 30384 8
-pui32Stack b 20000000 100
+pui32Stack b 2000026c 100
 ResetISR T 30318 64
 __shared_size__ A 18000 
 __shared_start__ T 18000 
+SysCtlPeripheralEnable T 3085c 50
+SysCtlPeripheralReady T 30804 58
 _text T 30000 
 zero_loop t 30348 

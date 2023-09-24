@@ -36,7 +36,7 @@
 // This is part of revision 2.2.0.295 of the Tiva Peripheral Driver Library.
 //
 //*****************************************************************************
-
+#include <stdbool.h> 
 #ifndef __DRIVERLIB_INTERRUPT_H__
 #define __DRIVERLIB_INTERRUPT_H__
 
