@@ -1,3 +1,19 @@
+#include <inttypes.h>
+#include "memory_map.h"
+
+#include <stdbool.h>
+#include <stdint.h>
+#include "inc/hw_ints.h"
+#include "inc/hw_memmap.h"
+#include "inc/hw_types.h"
+#include "driverlib/gpio.h"
+#include "driverlib/interrupt.h"
+#include "driverlib/pin_map.h"
+#include "driverlib/sysctl.h"
+#include "driverlib/uart.h"
+#include "utils/uartstdio.h"
+#include "driverlib/flash.h"
+
 #define SYSCTL_RCGCGPIO_R (*((volatile unsigned long *) 0x400FE608))
 #define GPIO_PORTF_DEN_R  (*((volatile unsigned long *) 0x4002551C))
 #define GPIO_PORTF_DIR_R  (*((volatile unsigned long *) 0x40025400))
@@ -15,9 +31,38 @@
 #define DELAY_VALUE        400000  
 
 void Delay(void);
+void blink(uint8_t pin, int n){
+    for(int i = 0; i<n; i++){
+        led_on(pin);
+        delay(400000);
+        led_off(pin);
+        delay(400000);
+    }
+}
+
+
+
+//Interrupt service routine
+void GPIOIntHandler(void){
+	GPIOIntClear(GPIO_PORTB_BASE, GPIO_INT_PIN_0);
+	blink(GPIO_PIN_3, 1);
+}
+
+void GPIO_int_init(void){
+	SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
+	GPIOPinTypeGPIOInput(GPIO_PORTB_BASE, GPIO_PIN_0);
+	GPIOPadConfigSet(GPIO_PORTB_BASE, GPIO_PIN_0, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
+	GPIOIntEnable(GPIO_PORTB_BASE, GPIO_INT_PIN_0);
+	GPIOIntTypeSet(GPIO_PORTB_BASE, GPIO_PIN_0, GPIO_FALLING_EDGE);
+	IntPrioritySet(INT_GPIOB, 0);
+	IntRegister(INT_GPIOB, GPIOIntHandler);
+	IntEnable(INT_GPIOB);
+	IntMasterEnable();
+}
 
 int main(void)
 {
+	GPIO_int_init();
 	SYSCTL_RCGCGPIO_R |= GPIO_PORTF_CLK_EN;     //enable clock for PORTF
 	GPIO_PORTF_DEN_R  |= GPIO_PORTF_PIN1_EN;    //enable pins 1 on PORTF
 	GPIO_PORTF_DIR_R  |= GPIO_PORTF_PIN1_EN;    //make pins 1 as output pins

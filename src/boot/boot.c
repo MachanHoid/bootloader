@@ -59,6 +59,34 @@ uint32_t bootrom_size = &__bootrom_size__;
 //     GPIOPinWrite(GPIO_PORTF_BASE, pin, 0x0);
 
 // }
+void blink(uint8_t pin, int n){
+    for(int i = 0; i<n; i++){
+        led_on(pin);
+        delay(400000);
+        led_off(pin);
+        delay(400000);
+    }
+}
+
+
+
+//Interrupt service routine
+void GPIOIntHandler(void){
+	GPIOIntClear(GPIO_PORTB_BASE, GPIO_INT_PIN_0);
+	blink(GPIO_PIN_3, 1);
+}
+
+void GPIO_int_init(void){
+	SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
+	GPIOPinTypeGPIOInput(GPIO_PORTB_BASE, GPIO_PIN_0);
+	GPIOPadConfigSet(GPIO_PORTB_BASE, GPIO_PIN_0, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
+	GPIOIntEnable(GPIO_PORTB_BASE, GPIO_INT_PIN_0);
+	GPIOIntTypeSet(GPIO_PORTB_BASE, GPIO_PIN_0, GPIO_FALLING_EDGE);
+	IntPrioritySet(INT_GPIOB, 0);
+	IntRegister(INT_GPIOB, GPIOIntHandler);
+	IntEnable(INT_GPIOB);
+	IntMasterEnable();
+}
 
 static void uart_init(){
     //no need sysctlclockset?
@@ -120,6 +148,8 @@ int main(void){
     led_setup();
     //configure serial communication
     uart_init();
+
+    GPIO_int_init();
 
     //ack
     int32_t ack;
