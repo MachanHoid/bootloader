@@ -22,7 +22,6 @@ sharedlib_obj_dir = build/obj_temp/shared_libraries_obj_temp
 sharedlib_obj = $(patsubst ./$(sharedlib_src_dir)/%.c, ./$(sharedlib_obj_dir)/%.o, $(sharedlib_src))
 
 boot_files = $(call rwildcard, ./$(boot_folder), *.c) 
-startup_files = $(call rwildcard, ./$(startup_folder), *.c) 
 
 .PHONY: all 
 
