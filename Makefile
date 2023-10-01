@@ -14,10 +14,12 @@ create_build_dir:
 	@mkdir -p build/helper_files_temp
 	@mkdir -p build/helper_files_temp/shared_files
 	@mkdir -p build/helper_files_temp/app_files
+	@mkdir build/helper_files_temp/shared_files/unopt_bootloader_syms
+	@mkdir build/helper_files_temp/shared_files/sharedlib_syms
 
 	@mkdir -p outputs
 
-
+# chmod the shell scripts
 prepare_shared:
 	make -f makefiles/gen_shared_funcs.mak
 
