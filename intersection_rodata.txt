@@ -1,0 +1,9 @@
+g_pui32VCOFrequencies
+g_ui32GPIOIntMapBlizzardRows
+g_ui32GPIOIntMapSnowflakeRows
+g_sXTALtoMEMTIM
+g_pppui32XTALtoVCO
+g_ppui32GPIOIntMapSnowflake
+g_ppui32GPIOIntMapBlizzard
+g_pui32Xtals
+g_pui32GPIOBaseAddrs
