@@ -48,6 +48,7 @@ SHAREDLIB_COMPILE_FLAGS = -nostdlib \
 						-mcpu=cortex-m4 \
 						-mfloat-abi=hard \
 						-ffunction-sections \
+						-fdata-sections \
 						-c -Wall\
 
 SHAREDLIB_COMPILE_FLAGS += $(foreach i,$(includes),-I$(i))
@@ -101,5 +102,4 @@ LIB_NAME_DIR=$(dependancy_path)/build/outputs_temp
 get_dependancies:
 	@echo generating helper files
 	arm-none-eabi-nm --format=posix ${LIB_NAME_DIR}/unopt_bootloader.elf > build/helper_files_temp/shared_files/unopt_bootloader_funcs.txt
-	$(python) -u "scripts/shared_compare.py"
 	$(python) -u "scripts/shared_make_linker.py"

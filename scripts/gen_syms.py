@@ -58,4 +58,4 @@ except:
 json_file.close()
 
 json_file = open(json_path, 'w')
-json.dump(syms, json_file)
+json.dump(syms, json_file, indent=4)

@@ -1,32 +1,76 @@
+import numpy as np
+import json
+
+json_path = 'build/helper_files_temp/shared_files/sharedlib_syms.json' 
+json_file = open(json_path, 'r')
+sharedlib_syms = json.load(json_file)
+
+bootloader = open(f'build/helper_files_temp/shared_files/unopt_bootloader_funcs.txt')
+bootloader_syms = set()
+
+bootloader_element = bootloader.readline()
+while (bootloader_element):
+    # print(bootloader_element)
+    bootloader_syms.add(bootloader_element.split()[0])
+    bootloader_element = bootloader.readline()
+
+types = ['T', 't', 'U', 'r', 'R', 'l', 'L', 'f', 'd', 'D', 'b', 'B', 'a', 'A']
+def check_type(sharedlib_syms, sym):
+    for file in sharedlib_syms.keys():
+        for type in types:
+            if sym in sharedlib_syms[file][type]:
+                return type
+    return None
+
+    
+
+includes = {}
+discards = {}
+for type in types:
+    includes[type] = []
+    discards[type] = []
+
+#looks very ineffective, try to change
+
+for sym in bootloader_syms:
+    a = check_type(sharedlib_syms, sym)
+    if a:
+        includes[a].append(sym)
+
+for type in types:
+    for file in sharedlib_syms.keys():
+        for sym in sharedlib_syms[file][type]:
+            if sym not in includes[type]:
+                discards[type].append(sym)
+
 linker = open("linkers/shared_linker.ld",'r')
-function = open(f"build/helper_files_temp/shared_files/bootloader_intersection_sharedlib.txt",'r')
-notFunction = open(f"build/helper_files_temp/shared_files/bootloader_difference_sharedlib.txt",'r')
 newLinker = open("build/linkers_temp/shared_linker_new.ld",'w')
 
 new_linker = ''
-functions = [i.split()[0] for i in function.readlines()]
-functions = ['*(.text.' + i + ')' for i in functions]
-functions = '\n\t\t'.join(functions)
-
-noFunctions = [i.split()[0] for i in notFunction.readlines()]
-noFunctions = ['*(.text.' + i + ')' for i in noFunctions]
-noFunctions = '\n\t\t'.join(noFunctions)
 
 checkerDiscard = 0
-checkerFunction = 0
+checkerText = 0
+checkerRodata = 0
 linker_lines = linker.readlines()
 
 for i in linker_lines:
-    if i.strip() == '*(.text*)' and checkerFunction == 0:
+    if i.strip() == '*(.text*)' and checkerText == 0:
         new_linker += '\n\t\t'
-        new_linker += functions
+        new_linker += '\n\t\t'.join([f'*(.text.{sym})' for sym in includes['T']+includes['t']+includes['U']+includes['a']+includes['A']+includes['l']+includes['L']+includes['f']+includes['D']+includes['d']+includes['b']+includes['B']])
         new_linker += '\n'
-        checkerFunction = 1
+        checkerText = 1
+    elif i.strip() == '*(.rodata*)' and checkerRodata == 0:
+        new_linker += '\n\t\t'
+        new_linker += '\n\t\t'.join([f'*(.rodata.{sym})' for sym in includes['R']+includes['r']]) 
+        new_linker += '\n'
+        checkerRodata = 1
     elif i.strip() == '} > SHARED' and checkerDiscard == 0:
         new_linker += i
         new_linker += '\n/DISCARD/ :{'
         new_linker += '\n\t\t'
-        new_linker += noFunctions
+        new_linker += '\n\t\t'.join([f'*(.text.{sym})' for sym in discards['T']+discards['t']+includes['U']+includes['a']+includes['A']+includes['l']+includes['L']+includes['f']+includes['D']+includes['d']+includes['b']+includes['B']])
+        new_linker += '\n\t\t'
+        new_linker += '\n\t\t'.join([f'*(.rodata.{sym})' for sym in discards['R']+discards['r']])
         new_linker += '\n\t}\n'
         checkerDiscard = 1
     else:
@@ -35,5 +79,4 @@ newLinker.write(new_linker)
 
 linker.close()
 newLinker.close()
-function.close()
-notFunction.close()
+     
