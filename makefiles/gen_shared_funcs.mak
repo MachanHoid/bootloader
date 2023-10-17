@@ -60,7 +60,11 @@ compile_sharedlib: $(sharedlib_src)
 	@echo compiling shared_libraries
 	${compiler} ${CFLAGS}  $^ -o build/outputs_temp/unopt_shared.elf
 
-compile_bootloader: compile_bootloader_stage1 compile_bootloader_stage2 link_bootloader
+compile_bootloader: create_json compile_bootloader_stage1 compile_bootloader_stage2 link_bootloader
+
+sharedlib_json = build/helper_files_temp/shared_files/sharedlib_syms.json 
+create_json: 
+	touch $(sharedlib_json)
 
 compile_bootloader_stage1: $(sharedlib_obj) 
 	@echo compiling shared_libraries for bootloader
@@ -68,6 +72,8 @@ compile_bootloader_stage1: $(sharedlib_obj)
 $(sharedlib_obj_dir)/%.o : $(sharedlib_src_dir)/%.c
 	mkdir -p $(dir $@)
 	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $< -o $@
+	$(python) -u "scripts/gen_syms.py" $@ $(sharedlib_json)
+
 
 boot_obj_dir = build/obj_temp/boot_obj_temp
 boot_folder_escaped = src\/boot
@@ -95,6 +101,5 @@ LIB_NAME_DIR=$(dependancy_path)/build/outputs_temp
 get_dependancies:
 	@echo generating helper files
 	arm-none-eabi-nm --format=posix ${LIB_NAME_DIR}/unopt_bootloader.elf > build/helper_files_temp/shared_files/unopt_bootloader_funcs.txt
-	arm-none-eabi-nm --format=posix ${LIB_NAME_DIR}/unopt_shared.elf > build/helper_files_temp/shared_files/sharedlib_funcs.txt
 	$(python) -u "scripts/shared_compare.py"
 	$(python) -u "scripts/shared_make_linker.py"
