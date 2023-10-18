@@ -1,7 +1,10 @@
 import time
 import serial
+import json
 
-port = '/dev/tty.usbmodem0E23A66C1'
+config = json.load(open('config.json', 'r'))
+
+port = config['mcu_port']
 
 app_file = 'outputs/app.bin'
 # from time import delay
