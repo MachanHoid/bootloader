@@ -15,10 +15,10 @@ while (bootloader_element):
     bootloader_element = bootloader.readline()
 
 types = ['T', 't', 'U', 'r', 'R', 'l', 'L', 'f', 'd', 'D', 'b', 'B', 'a', 'A']
-def check_type(sharedlib_syms, sym):
-    for file in sharedlib_syms.keys():
+def check_type(lib_syms, sym):
+    for file in lib_syms.keys():
         for type in types:
-            if sym in sharedlib_syms[file][type]:
+            if sym in lib_syms[file][type]:
                 return type
     return None
 
@@ -42,6 +42,9 @@ for type in types:
         for sym in sharedlib_syms[file][type]:
             if sym not in includes[type]:
                 discards[type].append(sym)
+
+opt_shared_json_file = open('build/helper_files_temp/app_files/opt_shared_syms.json', 'w')
+json.dump(includes, opt_shared_json_file, indent=4)
 
 linker = open("linkers/shared_linker.ld",'r')
 newLinker = open("build/linkers_temp/shared_linker_new.ld",'w')

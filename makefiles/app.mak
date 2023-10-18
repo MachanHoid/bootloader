@@ -29,6 +29,7 @@ SHAREDLIB_COMPILE_FLAGS = -nostdlib \
 						-mcpu=cortex-m4 \
 						-mfloat-abi=hard \
 						-ffunction-sections \
+						-fdata-sections \
 						-c -Wall\
 
 SHAREDLIB_COMPILE_FLAGS += $(foreach i,$(includes),-I$(i))
@@ -47,7 +48,7 @@ LFAGS += --gc-sections
 
 CFLAGS =  -T $(new_linker_file) --gc-sections
 #------------------------------------------------------------------------
-all: compile_sharedlib gen_app_files link_app_raw  optimise_dependancies build_final
+all: compile_sharedlib create_json gen_app_files link_app_raw  optimise_dependancies build_final
 #------------------------------------------------------------------------
 # generate app + driverlib + shared
 # generate driver lib obj files
@@ -64,13 +65,20 @@ app_folder_escaped = src\/app
 app_obj_dir_escaped = build\/obj_temp\/app_obj_temp
 app_obj = $(foreach i,$(app_files), $(shell echo $(i) | sed 's/$(app_folder_escaped)/$(app_obj_dir_escaped)/1; s/\.c/\.o/'))
 
-gen_app_files: $(app_obj) 
+applib_json = build/helper_files_temp/app_files/applib_syms.json 
+
+create_json:
+	touch $(applib_json)
+
+gen_app_files: $(app_obj) create_json
 	@echo compiling app and startup
 	mkdir -p $(app_obj_dir)
+	
 
 $(app_obj_dir)/%.o : $(app_folder)/%.c
 	mkdir -p $(dir $@)	
 	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $^ -o $@
+	$(python) -u "scripts/gen_syms.py" $@ $(applib_json)
 
 
 
@@ -82,8 +90,6 @@ link_app_raw: $(app_obj)  $(sharedlib_obj)
 # compare with shared.elf funcs
 optimise_dependancies:
 	arm-none-eabi-nm --format=posix build/outputs_temp/unopt_app.elf > build/helper_files_temp/app_files/unopt_app_funcs.txt
-	arm-none-eabi-nm --format=posix outputs/shared.elf > build/helper_files_temp/app_files/shared_funcs.txt
-	$(python) -u "scripts/app_compare.py"
 	$(python) -u "scripts/app_make_linker.py"
 
 #build the final file
