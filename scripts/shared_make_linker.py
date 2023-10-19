@@ -65,7 +65,7 @@ for i in linker_lines:
     if i.strip() == '*(.text*)' and checkerText == 0:
         #writing everything other than r and R to data
         new_linker += '\n\t\t'
-        new_linker += '\n\t\t'.join([f'*(.text.{sym})' for sym in includes['T']+includes['t']+includes['U']+includes['a']+includes['A']+includes['l']+includes['L']+includes['f']+includes['D']+includes['d']+includes['b']+includes['B']])
+        new_linker += '\n\t\t'.join([f'*(.text.{sym})' for sym in includes['T']+includes['t']])
         new_linker += '\n'
         checkerText = 1
     elif i.strip() == '*(.rodata*)' and checkerRodata == 0:
@@ -77,7 +77,7 @@ for i in linker_lines:
         new_linker += i
         new_linker += '\n/DISCARD/ :{'
         new_linker += '\n\t\t'
-        new_linker += '\n\t\t'.join([f'*(.text.{sym})' for sym in discards['T']+discards['t']+includes['U']+includes['a']+includes['A']+includes['l']+includes['L']+includes['f']+includes['D']+includes['d']+includes['b']+includes['B']])
+        new_linker += '\n\t\t'.join([f'*(.text.{sym})' for sym in discards['T']+discards['t']])
         new_linker += '\n\t\t'
         new_linker += '\n\t\t'.join([f'*(.rodata.{sym})' for sym in discards['R']+discards['r']])
         new_linker += '\n\t}\n'
