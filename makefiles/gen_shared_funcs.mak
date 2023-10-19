@@ -89,7 +89,8 @@ $(boot_obj_dir)/%.o : $(boot_folder)/%.c
 	mkdir -p $(dir $@)	
 	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $^ -o $@
 
-LFAGS = -T ${linker_file}
+bootloader_linker = linkers/boot_linker.ld
+LFAGS = -T ${bootloader_linker}
 LFAGS += --gc-sections
 
 #link it with gc sections to make unopt_bootloader
