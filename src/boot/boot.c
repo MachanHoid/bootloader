@@ -151,7 +151,7 @@ int main(void){
     uint32_t b3;
     uint32_t b4;
     
-    //send file length
+    //receive file length
     b1 = UARTCharGet(UART0_BASE);
     b2 = UARTCharGet(UART0_BASE);
     b3 = UARTCharGet(UART0_BASE);

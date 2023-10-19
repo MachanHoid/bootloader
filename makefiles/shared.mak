@@ -1,3 +1,4 @@
+#defining constants and directories
 compiler = arm-none-eabi-gcc
 assembler = arm-none-eabi-as
 linker = arm-none-eabi-ld
@@ -19,6 +20,7 @@ defines = TARGET_IS_TM4C123_RB1 \
 		
 includes = ${dependancy_path}/shared_libraries 
 
+#to compile .c files to .o files
 SHAREDLIB_COMPILE_FLAGS = -nostdlib \
 						-mcpu=cortex-m4 \
 						-mfloat-abi=hard \
@@ -35,6 +37,7 @@ all: compile_sharedlib link update_syms
 compile_sharedlib: $(sharedlib_obj)
 	@echo compiling sharedlib
 
+#compiling all sharedlib
 $(sharedlib_obj_dir)/%.o : $(sharedlib_src_dir)/%.c
 	mkdir -p $(dir $@)
 	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $< -o $@
@@ -42,13 +45,16 @@ $(sharedlib_obj_dir)/%.o : $(sharedlib_src_dir)/%.c
 linker_file = build/linkers_temp/shared_linker_new.ld
 elf_file = outputs/shared.elf
 
-CFLAGS =  -T $(linker_file)
+#linker flags
+LFLAGS =  -T $(linker_file)
 
 
+#linking the shared lib objects with new linker to get only the functions that are common with bootloader.
 link: $(sharedlib_obj)
 	@echo linking shared.elf
-	$(linker) $(CFLAGS) $^ -o $(elf_file)
+	$(linker) $(LFLAGS) $^ -o $(elf_file)
 
+#makes a new linker used to give the shared addresses to boot_new_linker and app_new_linker
 update_syms:
 	@echo syms file created with shared files
 	@ scripts/${addressTable} outputs/shared.elf build/linkers_temp/shared_syms.ld

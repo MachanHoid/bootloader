@@ -12,5 +12,6 @@ LIB_NAME=$1
 
 LIB_SYMS=$2
 
+#generating the local and Global text symbols for a elf file
 arm-none-eabi-nm --format=posix ${LIB_NAME} | ${AWK_PATH}awk '/ T / {print $1 " = 0x0" $3 ";"}' > ${LIB_SYMS}
 arm-none-eabi-nm --format=posix ${LIB_NAME} | ${AWK_PATH}awk '/ t / {print $1 " = 0x0" $3 ";"}' >> ${LIB_SYMS}

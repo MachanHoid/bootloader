@@ -7,7 +7,7 @@ config = json.load(open('config.json', 'r'))
 port = config['mcu_port']
 
 app_file = 'outputs/app.bin'
-# from time import delay
+#Initialising handshake
 ser = serial.Serial(port, 9600, timeout=1)
 while True:
     ser.write(b'\xff')
@@ -17,13 +17,13 @@ while True:
         print('First ACK Received')
         break
 ser.close()
-
+#sending app
 ser2 = serial.Serial(port, 9600)
 print('Sending File length')
 with open(app_file, 'rb') as app:
     filebytes = app.read()
     filelength = len(filebytes)
-    
+    #send file length
     print(f'file length: {filelength}')
     b1 = filelength & 0xFF
     b2 = (filelength >> 8) & 0xFF 
@@ -38,12 +38,13 @@ with open(app_file, 'rb') as app:
     ser2.write(b2)
     ser2.write(b3)
     ser2.write(b4)
-    print('File length sent')    
+    print('File length sent')   
+    #ack 
     ack = ser2.read(1)
     if ack == b'\xff':
         print('File Length ACK Received')
 
-
+#sending app contents
 print('Sending App')
 with open(app_file, 'rb') as app:
     data = app.read()
@@ -52,12 +53,14 @@ with open(app_file, 'rb') as app:
         byte = bytearray([byte])
         ser2.write(byte)
         i+=1
+        #receiving ack every 4 bytes
         if i%4 == 0:
             ack = ser2.read(1)
             if ack == b'\xff':
                 print(f'{i} Bytes Sent')
         time.sleep(0.0001)
 
+#padding as bootloader expects 4 byte bursts
 num_padding = (4 - filelength%4) % 4
 for i in range(num_padding):
     ser2.write(b'\xff')

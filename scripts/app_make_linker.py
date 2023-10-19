@@ -42,6 +42,7 @@ for type in types:
             if sym not in includes[type]:
                 discards[type].append(sym)
 
+#making the linker
 linker = open("linkers/app_linker.ld",'r')
 newLinker = open("build/linkers_temp/app_linker_new.ld",'w')
 
@@ -53,6 +54,7 @@ checkerRodata = 0
 linker_lines = linker.readlines()
 
 for i in linker_lines:
+    #everything other than r and R goes to .text
     if i.strip() == '*(.text*)' and checkerText == 0:
         new_linker += '\n\t\t'
         new_linker += '\n\t\t'.join([f'*(.text.{sym})' for sym in includes['T']+includes['t']+includes['U']+includes['a']+includes['A']+includes['l']+includes['L']+includes['f']+includes['D']+includes['d']+includes['b']+includes['B']])
@@ -74,7 +76,7 @@ for i in linker_lines:
         checkerDiscard = 1
     else:
         new_linker += i
-
+#including opt_shared syms addresses
 new_linker += 'INCLUDE build/linkers_temp/shared_syms.ld'
 
 newLinker.write(new_linker)
