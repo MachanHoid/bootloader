@@ -7,7 +7,7 @@ json_file = open(json_path, 'r')
 sharedlib_syms = json.load(json_file)
 
 #load unopt bootloader syms
-bootloader = open(f'build/helper_files_temp/shared_files/unopt_bootloader_funcs.txt')
+bootloader = open(f'build/helper_files_temp/shared_files/unopt_bootloader_syms.txt')
 bootloader_syms = set()
 
 bootloader_element = bootloader.readline()

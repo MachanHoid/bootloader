@@ -1,3 +1,4 @@
+#defining constants and directories
 compiler = arm-none-eabi-gcc
 assembler = arm-none-eabi-as
 linker = arm-none-eabi-ld
@@ -5,14 +6,14 @@ ocpy = arm-none-eabi-objcopy
 python = python3
 
 app_folder = src/app
-startup_folder = startup
 
+# defining app files in app dir
 rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
 app_files = $(call rwildcard, ./$(app_folder), *.c) 
-startup_files = $(call rwildcard, ./$(startup_folder), *.c) 
 
 dependancy_path = .
 
+#defining shared files in sharedlib dir
 sharedlib_src_dir = shared_libraries
 sharedlib_src = $(call rwildcard, ./$(sharedlib_src_dir), *.c)
 
@@ -25,6 +26,7 @@ defines = TARGET_IS_TM4C123_RB1 \
 
 includes = ${dependancy_path}/shared_libraries 
 
+#to compile .o from .c files
 SHAREDLIB_COMPILE_FLAGS = -nostdlib \
 						-mcpu=cortex-m4 \
 						-mfloat-abi=hard \
@@ -48,10 +50,10 @@ LFAGS += --gc-sections
 
 CFLAGS =  -T $(new_linker_file) --gc-sections
 #------------------------------------------------------------------------
-all: compile_sharedlib create_json gen_app_files link_app_raw  optimise_dependancies build_final
+all: compile_sharedlib create_json gen_app_files link_unopt_app  optimise_dependancies build_final
 #------------------------------------------------------------------------
-# generate app + driverlib + shared
-# generate driver lib obj files
+# generate app + sharedlib
+# generate shared lib obj files
 
 compile_sharedlib: $(sharedlib_obj)
 	@echo compiling sharedlib
@@ -71,10 +73,10 @@ create_json:
 	touch $(applib_json)
 
 gen_app_files: $(app_obj) create_json
-	@echo compiling app and startup
+	@echo compiling app  
 	mkdir -p $(app_obj_dir)
 	
-
+#create each app obj file and update its syms
 $(app_obj_dir)/%.o : $(app_folder)/%.c
 	mkdir -p $(dir $@)	
 	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $^ -o $@
@@ -83,16 +85,16 @@ $(app_obj_dir)/%.o : $(app_folder)/%.c
 
 
 # kill dead code in this
-#linking
-link_app_raw: $(app_obj)  $(sharedlib_obj)
+#linking unopt app from sharedlib and app objects
+link_unopt_app: $(app_obj)  $(sharedlib_obj)
 	$(linker) $(LFAGS) $^ -o build/outputs_temp/unopt_app.elf
 	
-# compare with shared.elf funcs
+# compare with shared.elf syms and make new linker 
 optimise_dependancies:
-	arm-none-eabi-nm --format=posix build/outputs_temp/unopt_app.elf > build/helper_files_temp/app_files/unopt_app_funcs.txt
+	arm-none-eabi-nm --format=posix build/outputs_temp/unopt_app.elf > build/helper_files_temp/app_files/unopt_app_syms.txt
 	$(python) -u "scripts/app_make_linker.py"
 
-#build the final file
+#build the final file with links to shared.elf funcs and create binary output.
 build_final: $(app_obj)  $(sharedlib_obj)
 	$(linker) $(CFLAGS) $^ -o $(elf_file)
 	${ocpy} -O binary outputs/app.elf outputs/app.bin

@@ -27,7 +27,7 @@ boot_files = $(call rwildcard, ./$(boot_folder), *.c)
 
 .PHONY: all 
 
-all:makeBuildDir  compile_bootloader get_dependancies
+all:  compile_bootloader get_dependancies
 
 defines = TARGET_IS_TM4C123_RB1 \
 		PART_TM4C123GH6PM \
@@ -56,10 +56,6 @@ SHAREDLIB_COMPILE_FLAGS = -nostdlib \
 
 SHAREDLIB_COMPILE_FLAGS += $(foreach i,$(includes),-I$(i))
 SHAREDLIB_COMPILE_FLAGS += $(foreach d,$(defines),-D $(d))
-
-makeBuildDir:
-	mkdir -p build/obj_temp/shared_libraries_obj_temp
-
 
 compile_bootloader: create_json compile_bootloader_stage1 compile_bootloader_stage2 link_bootloader
 
@@ -106,5 +102,5 @@ LIB_NAME_DIR=$(dependancy_path)/build/outputs_temp
 #get the unopt bootloader syms and make linker using the syms obtained
 get_dependancies:
 	@echo generating helper files
-	arm-none-eabi-nm --format=posix ${LIB_NAME_DIR}/unopt_bootloader.elf > build/helper_files_temp/shared_files/unopt_bootloader_funcs.txt
+	arm-none-eabi-nm --format=posix ${LIB_NAME_DIR}/unopt_bootloader.elf > build/helper_files_temp/shared_files/unopt_bootloader_syms.txt
 	$(python) -u "scripts/shared_make_linker.py"

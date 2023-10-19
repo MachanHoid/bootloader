@@ -4,7 +4,7 @@ import json
 opt_shared = json.load(open('build/helper_files_temp/app_files/opt_shared_syms.json'))
 
 #getting unopt_app_syms
-app = open(f'build/helper_files_temp/app_files/unopt_app_funcs.txt')
+app = open(f'build/helper_files_temp/app_files/unopt_app_syms.txt')
 app_syms = set()
 app_element = app.readline()
 while (app_element):
