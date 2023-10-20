@@ -14,7 +14,6 @@ Gets all the syms in unopt_bootloader
 Generates new linker file for the shared.elf 
 
 ## shared.mak
-Compiles shared lib object files again. (not neccesary in sequence)
 Links sharedlib with new linker so only syms common to shared and bootloader are in shared.elf. Generates final output file - `shared.elf`
 Creates `shared_syms.ld` that is used to identify these shared libs in the `boot_linker_new.ld` and `app_linker_new.ld`
 
@@ -23,7 +22,6 @@ makes new linker with links to the syms in `shared.elf`
 compiles with new linker to create `boot.elf` and `boot.bin`
 
 ## app.mak
-compiles sharedlib again (redundant)
 creates applib_syms.json having all the symbols of the app files.
 creates all the app object files
 links the unoptimised app with shared lib and app files with gc sections. 

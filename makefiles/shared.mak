@@ -32,15 +32,7 @@ SHAREDLIB_COMPILE_FLAGS += $(foreach d,$(defines),-D $(d))
 
 addressTable = gen_address_table.sh
 
-all: compile_sharedlib link update_syms
-
-compile_sharedlib: $(sharedlib_obj)
-	@echo compiling sharedlib
-
-#compiling all sharedlib
-$(sharedlib_obj_dir)/%.o : $(sharedlib_src_dir)/%.c
-	mkdir -p $(dir $@)
-	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $< -o $@
+all: link update_syms
 
 linker_file = build/linkers_temp/shared_linker_new.ld
 elf_file = outputs/shared.elf

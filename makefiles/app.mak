@@ -50,18 +50,9 @@ LFAGS += --gc-sections
 
 CFLAGS =  -T $(new_linker_file) --gc-sections
 #------------------------------------------------------------------------
-all: compile_sharedlib create_json gen_app_files link_unopt_app  optimise_dependancies build_final
+all: create_json gen_app_files link_unopt_app  optimise_dependancies build_final
 #------------------------------------------------------------------------
 # generate app + sharedlib
-# generate shared lib obj files
-
-compile_sharedlib: $(sharedlib_obj)
-	@echo compiling sharedlib
-
-$(sharedlib_obj_dir)/%.o : $(sharedlib_src_dir)/%.c
-	mkdir -p $(dir $@)
-	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $< -o $@
-
 app_obj_dir = build/obj_temp/app_obj_temp
 app_folder_escaped = src\/app
 app_obj_dir_escaped = build\/obj_temp\/app_obj_temp
