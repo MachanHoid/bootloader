@@ -1,7 +1,7 @@
 import json
 
 #dictionary of types as keys and list of syms as value
-opt_shared = json.load(open('build/helper_files_temp/app_files/opt_shared_syms.json'))
+opt_shared = json.load(open('build/helper_files_temp/shared_files/opt_shared_syms.json'))
 
 #getting unopt_app_syms
 app = open(f'build/helper_files_temp/app_files/unopt_app_syms.txt')
@@ -16,7 +16,7 @@ sharedlib_syms = json.load(open('build/helper_files_temp/shared_files/sharedlib_
 applib_syms = json.load(open('build/helper_files_temp/app_files/applib_syms.json'))
 
 types = ['T', 't', 'U', 'r', 'R', 'l', 'L', 'f', 'd', 'D', 'b', 'B', 'a', 'A']
-def check_type(lib_syms, sym):
+def check_type(lib_syms, sym, types):
     for file in lib_syms.keys():
         for type in types:
             if sym in lib_syms[file][type]:
@@ -31,7 +31,7 @@ for type in types:
 
 #creating the includes, app syms that are not in opt_shared
 for sym in app_syms:
-    type = check_type(applib_syms, sym)
+    type = check_type(applib_syms, sym, types)
     if type:
         if sym not in opt_shared[type]:
             includes[type].append(sym)

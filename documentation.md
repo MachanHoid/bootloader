@@ -33,11 +33,11 @@ Creates final output `app.elf` and `app.bin` using new linker.
 ## helper_files_temp
 ### app_files
 `applib_syms.json` - has all syms of app files in json form, with keys as file names and values as dict with key of types of syms and value as list of syms
-`opt_shared_syms.json` - has syms of the ouput shared.elf - dict with key of types of syms and value as list of syms
 `unopt_app_syms.txt` - text file with symbol names in `unopt_shared.elf`
 
 ### shared_files
 `sharedlib_syms.json` - has all the symbols of each sharedlib obj file in json form, with keys as file names and values as dict with key of types of syms and value as list of syms
+`opt_shared_syms.json` - has syms of the ouput shared.elf - dict with key of types of syms and value as list of syms
 `unopt_bootloader_syms.txt` - text file with symbol names in `unopt_bootloader.elf`
 
 ## linkers_temp

@@ -3,6 +3,7 @@ compiler = arm-none-eabi-gcc
 assembler = arm-none-eabi-as
 linker = arm-none-eabi-ld
 ocpy = arm-none-eabi-objcopy
+python = python3
 
 dependancy_path:= .
 
@@ -49,7 +50,7 @@ link: $(sharedlib_obj)
 #makes a new linker used to give the shared addresses to boot_new_linker and app_new_linker
 update_syms:
 	@echo syms file created with shared files
-	@ scripts/${addressTable} outputs/shared.elf build/linkers_temp/shared_syms.ld
+	$(python) -u "scripts/make_shared_syms_linker.py"
 
 # Once this is done remove unnecessary sections using 
 # arm-none-eabi-objcopy --remove-sections <section name> <file name>

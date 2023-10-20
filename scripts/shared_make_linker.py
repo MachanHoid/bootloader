@@ -16,7 +16,7 @@ while (bootloader_element):
     bootloader_element = bootloader.readline()
 
 types = ['T', 't', 'U', 'r', 'R', 'l', 'L', 'f', 'd', 'D', 'b', 'B', 'a', 'A']
-def check_type(lib_syms, sym):
+def check_type(lib_syms, sym, types):
     for file in lib_syms.keys():
         for type in types:
             if sym in lib_syms[file][type]:
@@ -35,7 +35,7 @@ for type in types:
 
 #include every symbol in bootloader and shared lib
 for sym in bootloader_syms:
-    a = check_type(sharedlib_syms, sym)
+    a = check_type(sharedlib_syms, sym, types)
     if a:
         includes[a].append(sym)
 
@@ -47,7 +47,7 @@ for type in types:
                 discards[type].append(sym)
 
 #write these includes to opt_shared.json
-opt_shared_json_file = open('build/helper_files_temp/app_files/opt_shared_syms.json', 'w')
+opt_shared_json_file = open('build/helper_files_temp/shared_files/opt_shared_syms.json', 'w')
 json.dump(includes, opt_shared_json_file, indent=4)
 
 #write new linker

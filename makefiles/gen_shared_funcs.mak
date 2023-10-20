@@ -60,7 +60,7 @@ SHAREDLIB_COMPILE_FLAGS += $(foreach d,$(defines),-D $(d))
 compile_bootloader: create_json compile_bootloader_stage1 compile_bootloader_stage2 link_bootloader
 
 sharedlib_json = build/helper_files_temp/shared_files/sharedlib_syms.json 
-opt_shared_json = build/helper_files_temp/app_files/opt_shared_syms.json  
+opt_shared_json = build/helper_files_temp/shared_files/opt_shared_syms.json  
 create_json: 
 	touch $(sharedlib_json)
 	touch $(opt_shared_json) 
