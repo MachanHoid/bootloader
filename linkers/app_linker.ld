@@ -4,27 +4,27 @@ SECTIONS
 {
     .text :
     {
-        _text = .;
+        _apptext = .;
         KEEP(*(.isr_vector))
         *(.text*)
         *(.rodata*)
-        _etext = .;
+        _appetext = .;
     } > APPROM 
 
     .data : AT(ADDR(.text) + SIZEOF(.text))
     {
-        _data = .;
-        _ldata = LOADADDR (.data);
+        _appdata = .;
+        _appldata = LOADADDR (.data);
         *(vtable)
         *(.data*)
-        _edata = .;
+        _appedata = .;
     } > SRAM
 
     .bss :
     {
-        _bss = .;
+        _appbss = .;
         *(.bss*)
         *(COMMON)
-        _ebss = .;
+        _appebss = .;
     } > SRAM
 }

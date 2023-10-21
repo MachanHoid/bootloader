@@ -20,45 +20,7 @@ uint32_t approm_size = &__approm_size__;
 uint32_t bootrom_start = &__bootrom_start__;
 uint32_t bootrom_size = &__bootrom_size__;
 
-// void delay( int n){
-//     for(volatile int i = 0; i<n; i++);
-// }
-
-// void led_setup(void){
-//     //
-//     // Enable the GPIO port that is used for the on-board LED.
-//     //
-//     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
-
-//     //
-//     // Check if the peripheral access is enabled.
-//     //
-//     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOF))
-//     {
-//     }
-
-//     //
-//     // Enable the GPIO pin for the LED (PF3).  Set the direction as output, and
-//     // enable the GPIO pin for digital function.
-//     //
-//     GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_3);
-//     GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_2);
-//     GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_1);
-
-
-// }
-
-// void led_on(uint8_t pin){
-    
-//     GPIOPinWrite(GPIO_PORTF_BASE, pin, pin);
-
-// }
-
-// void led_off(uint8_t pin){
-    
-//     GPIOPinWrite(GPIO_PORTF_BASE, pin, 0x0);
-
-// }
+extern int check_if_sharedram_working;
 
 static void uart_init(){
     //no need sysctlclockset?
@@ -140,6 +102,13 @@ int main(void){
             break;
         }
     }
+
+    // if(check_if_sharedram_working == 10){
+    //     led_on(GPIO_PIN_1);
+    //     delay(40000);
+    //     led_off(GPIO_PIN_1);
+    // }
+
     if(!app_update_flag) {
         start_app();
         led_on(GPIO_PIN_2);

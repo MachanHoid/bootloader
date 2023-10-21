@@ -1,0 +1,1 @@
+extern int check_if_sharedram_working;

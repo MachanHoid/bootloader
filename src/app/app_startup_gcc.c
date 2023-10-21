@@ -239,11 +239,11 @@ void (* const g_pfnVectors[])(void) =
 // for the "data" segment resides immediately following the "text" segment.
 //
 //*****************************************************************************
-extern uint32_t _ldata;
-extern uint32_t _data;
-extern uint32_t _edata;
-extern uint32_t _bss;
-extern uint32_t _ebss;
+extern uint32_t _appldata;
+extern uint32_t _appdata;
+extern uint32_t _appedata;
+extern uint32_t _appbss;
+extern uint32_t _appebss;
 
 //*****************************************************************************
 //
@@ -263,8 +263,8 @@ ResetISR(void)
     //
     // Copy the data segment initializers from flash to SRAM.
     //
-    pui32Src = &_ldata;
-    for(pui32Dest = &_data; pui32Dest < &_edata; )
+    pui32Src = &_appldata;
+    for(pui32Dest = &_appdata; pui32Dest < &_appedata; )
     {
         *pui32Dest++ = *pui32Src++;
     }
@@ -272,8 +272,8 @@ ResetISR(void)
     //
     // Zero fill the bss segment.
     //
-    __asm("    ldr     r0, =_bss\n"
-          "    ldr     r1, =_ebss\n"
+    __asm("    ldr     r0, =_appbss\n"
+          "    ldr     r1, =_appebss\n"
           "    mov     r2, #0\n"
           "    .thumb_func\n"
           "zero_loop:\n"

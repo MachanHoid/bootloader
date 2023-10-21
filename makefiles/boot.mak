@@ -22,6 +22,7 @@ all:make_new_linker compile
 defines = TARGET_IS_TM4C123_RB1 \
 		PART_TM4C123GH6PM \
 		gcc \
+		opt_bootloader \
 
 includes = ${dependancy_path}/shared_libraries 
 

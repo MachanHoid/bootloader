@@ -4,27 +4,27 @@ SECTIONS
 {
     .text :
     {
-        _text = .;
+        _boottext = .;
         KEEP(*(.isr_vector))
         *(.text*)
         *(.rodata*)
-        _etext = .;
+        _bootetext = .;
     } > BOOTROM
 
     .data : AT(ADDR(.text) + SIZEOF(.text))
     {
-        _data = .;
-        _ldata = LOADADDR (.data);
+        _bootdata = .;
+        _bootldata = LOADADDR (.data);
         *(vtable)
         *(.data*)
-        _edata = .;
+        _bootedata = .;
     } > SRAM
 
     .bss :
     {
-        _bss = .;
+        _bootbss = .;
         *(.bss*)
         *(COMMON)
-        _ebss = .;
+        _bootebss = .;
     } > SRAM
 }

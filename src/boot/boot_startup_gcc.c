@@ -239,11 +239,19 @@ void (* const g_pfnVectors[])(void) =
 // for the "data" segment resides immediately following the "text" segment.
 //
 //*****************************************************************************
-extern uint32_t _ldata;
-extern uint32_t _data;
-extern uint32_t _edata;
-extern uint32_t _bss;
-extern uint32_t _ebss;
+extern uint32_t _bootldata;
+extern uint32_t _bootdata;
+extern uint32_t _bootedata;
+extern uint32_t _bootbss;
+extern uint32_t _bootebss;
+
+#ifdef opt_bootloader
+extern uint32_t _sharedldata;
+extern uint32_t _shareddata;
+extern uint32_t _sharededata;
+extern uint32_t _sharedbss;
+extern uint32_t _sharedebss;
+#endif
 
 //*****************************************************************************
 //
@@ -263,17 +271,25 @@ ResetISR(void)
     //
     // Copy the data segment initializers from flash to SRAM.
     //
-    pui32Src = &_ldata;
-    for(pui32Dest = &_data; pui32Dest < &_edata; )
+    pui32Src = &_bootldata;
+    for(pui32Dest = &_bootdata; pui32Dest < &_bootedata; )
     {
         *pui32Dest++ = *pui32Src++;
     }
 
+    #ifdef opt_bootloader
+    pui32Src = &_sharedldata;
+    for(pui32Dest = &_shareddata; pui32Dest < &_sharededata; )
+    {
+        *pui32Dest++ = *pui32Src++;
+    }
+    #endif
+
     //
     // Zero fill the bss segment.
     //
-    __asm("    ldr     r0, =_bss\n"
-          "    ldr     r1, =_ebss\n"
+    __asm("    ldr     r0, =_bootbss\n"
+          "    ldr     r1, =_bootebss\n"
           "    mov     r2, #0\n"
           "    .thumb_func\n"
           "zero_loop:\n"
@@ -281,6 +297,18 @@ ResetISR(void)
           "        it      lt\n"
           "        strlt   r2, [r0], #4\n"
           "        blt     zero_loop");
+
+    #ifdef opt_bootloader
+    __asm("    ldr     r0, =_sharedbss\n"
+          "    ldr     r1, =_sharedebss\n"
+          "    mov     r2, #0\n"
+          "    .thumb_func\n"
+          "zero_loop2:\n"
+          "        cmp     r0, r1\n"
+          "        it      lt\n"
+          "        strlt   r2, [r0], #4\n"
+          "        blt     zero_loop2");
+    #endif
 
     //
     // Enable the floating-point unit.  This must be done here to handle the

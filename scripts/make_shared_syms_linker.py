@@ -8,7 +8,7 @@ shared_syms_linker = 'build/linkers_temp/shared_syms.ld'
 
 AWK_PATH='/usr/bin/'
 
-type_text = ['T', 't']
+req_types = ['T', 't', 'b', 'B', 'd', 'D', 'a', 'A']
 types = ['T', 't', 'U', 'r', 'R', 'l', 'L', 'f', 'd', 'D', 'b', 'B', 'a', 'A']
 
 #getting all opt_shared syms
@@ -22,12 +22,13 @@ def check_type(lib_syms, sym, types): #check type is different for opt_shared_sy
 
 #getting all symbols from the elf file
 shared_elf_syms = []
-for type in type_text:
+for type in req_types:
     shared_elf_syms += os.popen(f"arm-none-eabi-nm --format=posix {shared_elf} | {AWK_PATH}awk '/ {type} / " + "{print $1 \" = 0x0\" $3 \";\"}'").readlines()
 
 #checking and writing to the linker file
 shared_syms_linker_file = open(shared_syms_linker, 'w')
 for sym in shared_elf_syms:
     sym_name = sym.split()[0]
-    if check_type(opt_shared, sym_name, types):
-        shared_syms_linker_file.write(sym)
+    # if check_type(opt_shared, sym_name, types):
+    #     shared_syms_linker_file.write(sym)
+    shared_syms_linker_file.write(sym)
