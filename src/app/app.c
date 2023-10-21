@@ -30,7 +30,7 @@
 #include "driverlib/sysctl.h"
 
 
-extern int check_if_sharedram_working;
+extern int check_if_sharedram_working[];
 
 //*****************************************************************************
 //
@@ -65,11 +65,20 @@ main(void)
 {
     led_setup();
     delay(20000);
-    if(check_if_sharedram_working == 10){
-        led_on(GPIO_PIN_1);
-        delay(40000);
-        led_off(GPIO_PIN_1);
+
+    for (int i = 0; i < 100; i++){
+        if(check_if_sharedram_working[i] == 0){
+            led_on(GPIO_PIN_1);
+            delay(40000);
+            led_off(GPIO_PIN_1);
+            delay(40000);
+        }
     }
+
+        // led_on(GPIO_PIN_1);
+        // delay(40000);
+        // led_off(GPIO_PIN_1);
+
     volatile uint32_t ui32Loop;
 
     //

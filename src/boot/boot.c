@@ -20,7 +20,7 @@ uint32_t approm_size = &__approm_size__;
 uint32_t bootrom_start = &__bootrom_start__;
 uint32_t bootrom_size = &__bootrom_size__;
 
-extern int check_if_sharedram_working;
+extern int check_if_sharedram_working[];
 
 static void uart_init(){
     //no need sysctlclockset?
@@ -88,7 +88,7 @@ int main(void){
     int ack_limit = 100;
     int app_update_flag = 0;
     for (int num_ack_tries = 0; num_ack_tries < ack_limit; num_ack_tries++){
-        if(UARTCharsAvail){
+        if(UARTCharsAvail(UART0_BASE)){
             ack = UARTCharGetNonBlocking(UART0_BASE);
         }
         led_on(GPIO_PIN_2);

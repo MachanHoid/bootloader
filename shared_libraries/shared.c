@@ -14,7 +14,7 @@
 #include "utils/uartstdio.h"
 #include "driverlib/flash.h"
 
-extern int check_if_sharedram_working = 10;
+int check_if_sharedram_working[100];
 
 void delay( int n){
     for(volatile int i = 0; i<n; i++);
