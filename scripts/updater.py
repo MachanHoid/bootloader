@@ -1,6 +1,7 @@
 import time
 import serial
 import json
+import crcmod
 
 config = json.load(open('config.json', 'r'))
 
@@ -61,12 +62,27 @@ with open(app_file, 'rb') as app:
         time.sleep(0.0001)
 
 #padding as bootloader expects 4 byte bursts
+app_f = open(app_file, 'ab')
 num_padding = (4 - filelength%4) % 4
 for i in range(num_padding):
     ser2.write(b'\xff')
+    app_f.write(b'\xff')
 if not(num_padding==0):
     ack = ser2.read(1)
     if ack == b'\xff': 
         print(f'{num_padding} byte padding sent')
 print('App Sent Completed')
-ser2.close()
+
+#compute and send crc checksum
+app_f = open(app_file, 'rb')
+data = app_f.read()
+
+crc32 = crcmod.mkCrcFun( 0x4C11DB7, initCrc= 0x5a5a5a5a, rev = False)
+crc_checksum = crc32(data)
+for byte in bytearray(crc_checksum):
+    ser2.write(byte)
+ack = ser2.read(1)
+if ack == b'\xff': 
+    print(f'crc checksum sent: {crc_checksum}')
+
+ser2.close() 

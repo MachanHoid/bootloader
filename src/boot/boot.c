@@ -51,7 +51,14 @@ void uart_deinit(){
 }
 
 void crc_init(){
-
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_CCM0);
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_CCM0)){
+    }
+    CRCConfigSet(CCM0_BASE,
+                 CRC_CFG_INIT_SEED |
+                 CRC_CFG_TYPE_P4C11DB7 |
+                 CRC_CFG_SIZE_32BIT);
+    CRCSeedSet(CCM0_BASE, 0x5a5a5a5a);
 }
 
 static void branch_to_app(uint32_t pc, uint32_t sp) {
@@ -87,7 +94,7 @@ int main(void){
     led_setup();
     //configure serial communication
     uart_init();
-    // crc_init();
+    crc_init();
     //ack
     int32_t ack;
     int ack_limit = 100;
@@ -136,7 +143,7 @@ int main(void){
     uint32_t bytes_received = 0;
 
     erase_approm(1024);
-
+    uint32_t data[applen+1];
     while (bytes_received < applen)
     {
         b1 = UARTCharGet(UART0_BASE);
@@ -150,8 +157,35 @@ int main(void){
         if(flashflag==0)led_on(GPIO_PIN_3);
         if(flashflag==-1)led_on(GPIO_PIN_1);
         UARTCharPut(UART0_BASE, 0xff);
+        data[bytes_received/4] = msg;
     }
     // check crc
+    b1 = UARTCharGet(UART0_BASE);
+    b2 = UARTCharGet(UART0_BASE);
+    b3 = UARTCharGet(UART0_BASE);
+    b4 = UARTCharGet(UART0_BASE); 
+    uint32_t checksum = (b4<<24)| (b3<<16) | (b2<<8) | b1; 
+    data[-1] = checksum;
+    UARTCharPut(UART0_BASE, 0xff);
+
+    uint32_t crc_result = CRCDataProcess(CCM0_BASE, data, applen+1, false);
+
+    if(crc_result == 0x75fd6f5c){
+        for(int i=0; i<3; i++){
+            led_on(GPIO_PIN_3);
+            delay(40000);
+            led_off(GPIO_PIN_3);
+            delay(40000);
+        }
+    }
+    else{
+       for(int i=0; i<3; i++){
+            led_on(GPIO_PIN_1);
+            delay(40000);
+            led_off(GPIO_PIN_1);
+            delay(40000);
+        } 
+    }
 
     uart_deinit();
     start_app();
