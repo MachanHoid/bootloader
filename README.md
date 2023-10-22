@@ -1,8 +1,5 @@
 # Serial Bootloader
 
-Contributors: Nitin G, Adithyaa RG, AMS Arun Krishna and Vamsi Krishna
-
-
 ## Building
 Run make to build the output binary files.
 ```bash
@@ -30,3 +27,7 @@ Tp transmit the app, run:
 ```bash
 make transmit_app
 ```
+
+
+Contributors: Nitin G, Adithyaa RG, AMS Arun Krishna and Vamsi Krishna
+

@@ -14,6 +14,8 @@
 #include "utils/uartstdio.h"
 #include "driverlib/flash.h"
 
+#include "shared.h"
+
 int check_if_sharedram_working[100];
 
 void delay( int n){

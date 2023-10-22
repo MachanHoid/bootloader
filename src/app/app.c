@@ -29,8 +29,7 @@
 #include "driverlib/gpio.h"
 #include "driverlib/sysctl.h"
 
-
-extern int check_if_sharedram_working[];
+#include "shared.h"
 
 //*****************************************************************************
 //

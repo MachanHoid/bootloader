@@ -13,6 +13,7 @@
 #include "driverlib/uart.h"
 #include "utils/uartstdio.h"
 #include "driverlib/flash.h"
+#include "driverlib/crc.h"
 
 //defining variables
 uint32_t approm_start = &__approm_start__;
@@ -20,7 +21,7 @@ uint32_t approm_size = &__approm_size__;
 uint32_t bootrom_start = &__bootrom_start__;
 uint32_t bootrom_size = &__bootrom_size__;
 
-extern int check_if_sharedram_working[];
+#include "shared.h"
 
 static void uart_init(){
     //no need sysctlclockset?
@@ -47,6 +48,10 @@ void uart_deinit(){
     UARTDisable(UART0_BASE);
     SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOA);
     SysCtlPeripheralDisable(SYSCTL_PERIPH_UART0);
+}
+
+void crc_init(){
+
 }
 
 static void branch_to_app(uint32_t pc, uint32_t sp) {
@@ -82,7 +87,7 @@ int main(void){
     led_setup();
     //configure serial communication
     uart_init();
-
+    // crc_init();
     //ack
     int32_t ack;
     int ack_limit = 100;
@@ -146,6 +151,8 @@ int main(void){
         if(flashflag==-1)led_on(GPIO_PIN_1);
         UARTCharPut(UART0_BASE, 0xff);
     }
+    // check crc
+
     uart_deinit();
     start_app();
 
