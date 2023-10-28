@@ -65,14 +65,14 @@ main(void)
     led_setup();
     delay(20000);
 
-    for (int i = 0; i < 100; i++){
-        if(check_if_sharedram_working[i] == 0){
-            led_on(GPIO_PIN_1);
-            delay(40000);
-            led_off(GPIO_PIN_1);
-            delay(40000);
-        }
-    }
+    // for (int i = 0; i < 100; i++){
+    //     if(check_if_sharedram_working[i] == 0){
+    //         led_on(GPIO_PIN_1);
+    //         delay(40000);
+    //         led_off(GPIO_PIN_1);
+    //         delay(40000);
+    //     }
+    // }
 
         // led_on(GPIO_PIN_1);
         // delay(40000);

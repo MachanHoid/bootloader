@@ -77,9 +77,10 @@ print('App Sent Completed')
 app_f = open(app_file, 'rb')
 data = app_f.read()
 
-crc32 = crcmod.mkCrcFun( 0x4C11DB7, initCrc= 0x5a5a5a5a, rev = False)
+crc32 = crcmod.mkCrcFun( 0x104c11db7, initCrc= 0x5a5a5a5a, rev = False)
 crc_checksum = crc32(data)
-for byte in bytearray(crc_checksum):
+print(crc_checksum, type(crc_checksum))
+for byte in crc_checksum.to_bytes(4, 'little'):
     ser2.write(byte)
 ack = ser2.read(1)
 if ack == b'\xff': 
