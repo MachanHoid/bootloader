@@ -15,6 +15,7 @@
 #include "driverlib/flash.h"
 #include "driverlib/crc.h"
 
+#include "crc32.h"
 //defining variables
 uint32_t approm_start = &__approm_start__;
 uint32_t approm_size = &__approm_size__;
@@ -50,18 +51,18 @@ void uart_deinit(){
     SysCtlPeripheralDisable(SYSCTL_PERIPH_UART0);
 }
 
-uint32_t crc32_process(uint32_t msg, uint32_t seed, uint32_t poly){
-    uint64_t data = seed << 32 + msg;
-    uint64_t poly64 = poly << 31;
-    for(int i = 0; i < 32; i++){
-        if((data & 0b10000000000000000000000000000000) != 0){
-            data = data ^ poly64;
-        }
-        data = data << 1;
-    }
-    uint32_t result = (uint32_t) data >> 32;
-    return result;
-}
+// uint32_t crc32_process(uint32_t msg, uint32_t seed, uint32_t poly){
+//     uint64_t data = seed << 32 + msg;
+//     uint64_t poly64 = poly << 31;
+//     for(int i = 0; i < 32; i++){
+//         if((data & 0x80000000) != 0){
+//             data = data ^ poly64;
+//         }
+//         data = data << 1;
+//     }
+//     uint32_t result = (uint32_t) data >> 32;
+//     return result;
+// }
 
 static void branch_to_app(uint32_t pc, uint32_t sp) {
     __asm("           \n\
@@ -143,7 +144,7 @@ int main(void){
     uint32_t bytes_received = 0;
 
     erase_approm(1024);
-    uint32_t crc_seed = 0x5a5a5a5a;
+    uint32_t crc_seed = 0x0;
     while (bytes_received < applen)
     {
         b1 = UARTCharGet(UART0_BASE);
@@ -151,12 +152,14 @@ int main(void){
         b3 = UARTCharGet(UART0_BASE);
         b4 = UARTCharGet(UART0_BASE);
         msg = (b4<<24)| (b3<<16) | (b2<<8) | b1;
+        uint8_t buffer[4] = {b4, b3, b2, b1};
 
         int flashflag = FlashProgram(&msg, approm_start + bytes_received, 4);
         bytes_received += 4; 
         if(flashflag==0)led_on(GPIO_PIN_3);
         if(flashflag==-1)led_on(GPIO_PIN_1);
-        crc_seed = crc32_process(msg, crc_seed, 0x04C11DB7);
+        // crc_seed = crc32_process(msg, crc_seed, 0x04C11DB7);
+        crc_seed = update_crc32(buffer, 4, crc_seed);
         UARTCharPut(UART0_BASE, 0xff);
     }
     led_off(GPIO_PIN_1);
@@ -167,20 +170,22 @@ int main(void){
     b3 = UARTCharGet(UART0_BASE);
     b4 = UARTCharGet(UART0_BASE); 
     uint32_t checksum = (b4<<24)| (b3<<16) | (b2<<8) | b1; 
+    uint8_t checksum_buffer[4] = {b4, b3, b2, b1};
     UARTCharPut(UART0_BASE, 0xff);
 
-    uint32_t crc_result = crc32_process(checksum, crc_seed, 0x04C11DB7);
+    // uint32_t crc_result = crc32_process(checksum, crc_seed, 0x04C11DB7);
+    uint32_t crc_result = update_crc32(checksum_buffer, 4, crc_seed);
 
-    if(crc_result == 0x75fd6f5c){
-        for(int i=0; i<10; i++){
+    if(crc_result == 0x0){
+        for(int i=0; i<3; i++){
             led_on(GPIO_PIN_3);
-            delay(40000);
+            delay(400000);
             led_off(GPIO_PIN_3);
-            delay(40000);
+            delay(400000);
         }
     }
     else{
-       for(int i=0; i<10; i++){
+       for(int i=0; i<3; i++){
             led_on(GPIO_PIN_1);
             delay(400000);
             led_off(GPIO_PIN_1);

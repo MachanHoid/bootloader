@@ -1,130 +1,44 @@
-//*****************************************************************************
-//
-// blinky.c - Simple example to blink the on-board LED.
-//
-// Copyright (c) 2012-2020 Texas Instruments Incorporated.  All rights reserved.
-// Software License Agreement
-// 
-// Texas Instruments (TI) is supplying this software for use solely and
-// exclusively on TI's microcontroller products. The software is owned by
-// TI and/or its suppliers, and is protected under applicable copyright
-// laws. You may not combine this software with "viral" open-source
-// software in order to form a larger program.
-// 
-// THIS SOFTWARE IS PROVIDED "AS IS" AND WITH ALL FAULTS.
-// NO WARRANTIES, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT
-// NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. TI SHALL NOT, UNDER ANY
-// CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-// DAMAGES, FOR ANY REASON WHATSOEVER.
-// 
-// This is part of revision 2.2.0.295 of the EK-TM4C123GXL Firmware Package.
-//
-//*****************************************************************************
+#define SYSCTL_RCGCGPIO_R (*((volatile unsigned long *) 0x400FE608))
+#define GPIO_PORTF_DEN_R  (*((volatile unsigned long *) 0x4002551C))
+#define GPIO_PORTF_DIR_R  (*((volatile unsigned long *) 0x40025400))
+#define GPIO_PORTF_DATA_R (*((volatile unsigned long *) 0x40025038))
 
-#include <stdint.h>
-#include <stdbool.h>
-#include "inc/hw_memmap.h"
-#include "driverlib/debug.h"
-#include "driverlib/gpio.h"
-#include "driverlib/sysctl.h"
+	 
+#define GPIO_PORTF_CLK_EN  0x20
+#define GPIO_PORTF_PIN1_EN 0x02
+#define GPIO_PORTF_PIN2_EN 0x04
+#define GPIO_PORTF_PIN3_EN 0x08
+#define LED_ON1            0x02
+#define LED_ON2            0x04
+#define LED_ON3            0x08
 
-#include "shared.h"
+#define DELAY_VALUE        400000  
 
-//*****************************************************************************
-//
-//! \addtogroup example_list
-//! <h1>Blinky (blinky)</h1>
-//!
-//! A very simple example that blinks the on-board LED using direct register
-//! access.
-//
-//*****************************************************************************
+void Delay(void);
 
-//*****************************************************************************
-//
-// The error routine that is called if the driver library encounters an error.
-//
-//*****************************************************************************
-#ifdef DEBUG
-void
-__error__(char *pcFilename, uint32_t ui32Line)
+int main(void)
 {
-    while(1);
+	SYSCTL_RCGCGPIO_R |= GPIO_PORTF_CLK_EN;     //enable clock for PORTF
+	GPIO_PORTF_DEN_R  |= GPIO_PORTF_PIN1_EN;    //enable pins 1 on PORTF
+	GPIO_PORTF_DIR_R  |= GPIO_PORTF_PIN1_EN;    //make pins 1 as output pins
+	GPIO_PORTF_DEN_R  |= GPIO_PORTF_PIN2_EN;    //enable pins 2 on PORTF
+	GPIO_PORTF_DIR_R  |= GPIO_PORTF_PIN2_EN;    //make pins 2 as output pins
+	GPIO_PORTF_DEN_R  |= GPIO_PORTF_PIN3_EN;    //enable pins 3 on PORTF
+	GPIO_PORTF_DIR_R  |= GPIO_PORTF_PIN3_EN;    //make pins 3 as output pins
+	
+	while(1)
+	{
+		GPIO_PORTF_DATA_R = 0x04;    //Turn on RED LED 	 
+		Delay();	                   //Delay almost 1 sec
+		GPIO_PORTF_DATA_R = 0x00;    //Turn  off LED
+		Delay();                     //Delay almost 1 sec
+	}
+
+    return 0;
 }
-#endif
 
-//*****************************************************************************
-//
-// Blink the on-board LED.
-//
-//*****************************************************************************
-int
-main(void)
+void Delay(void)
 {
-    led_setup();
-    delay(20000);
-
-    // for (int i = 0; i < 100; i++){
-    //     if(check_if_sharedram_working[i] == 0){
-    //         led_on(GPIO_PIN_1);
-    //         delay(40000);
-    //         led_off(GPIO_PIN_1);
-    //         delay(40000);
-    //     }
-    // }
-
-        // led_on(GPIO_PIN_1);
-        // delay(40000);
-        // led_off(GPIO_PIN_1);
-
-    volatile uint32_t ui32Loop;
-
-    //
-    // Enable the GPIO port that is used for the on-board LED.
-    //
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
-
-    //
-    // Check if the peripheral access is enabled.
-    //
-    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOF))
-    {
-    }
-
-    //
-    // Enable the GPIO pin for the LED (PF3).  Set the direction as output, and
-    // enable the GPIO pin for digital function.
-    //
-    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_2);
-
-    //
-    // Loop forever.
-    //
-    while(1)
-    {
-        //
-        // Turn on the LED.
-        //
-        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, GPIO_PIN_2);
-
-        //
-        // Delay for a bit.
-        //
-        for(ui32Loop = 0; ui32Loop < 200000; ui32Loop++)
-        {
-        }
-
-        //
-        // Turn off the LED.
-        //
-        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, 0x0);
-
-        //
-        // Delay for a bit.
-        //
-        for(ui32Loop = 0; ui32Loop < 200000; ui32Loop++)
-        {
-        }
-    }
+	volatile unsigned long i;
+	for(i=0;i<DELAY_VALUE;i++);
 }
