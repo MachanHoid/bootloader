@@ -78,6 +78,15 @@ void erase_approm(int block_size){ //block size in bytes
     }
 }
 
+uint32_t parity_check(uint32_t value){
+    uint32_t result = 0;
+    while (value) {
+        result ^= value & 1;
+        value >>= 1;
+    }
+    return result;
+}
+
 int main(void){
     led_setup();
     //configure serial communication
@@ -131,7 +140,7 @@ int main(void){
     uint32_t bytes_received = 0;
 
     erase_approm(1024);
-
+    uint32_t parity = 0;
     while (bytes_received < applen)
     {
         b1 = UARTCharGet(UART0_BASE);
@@ -139,6 +148,7 @@ int main(void){
         b3 = UARTCharGet(UART0_BASE);
         b4 = UARTCharGet(UART0_BASE);
         msg = (b4<<24)| (b3<<16) | (b2<<8) | b1;
+        parity ^= parity_check(msg);
 
         int flashflag = FlashProgram(&msg, approm_start + bytes_received, 4);
         bytes_received += 4; 
@@ -146,6 +156,28 @@ int main(void){
         if(flashflag==-1)led_on(GPIO_PIN_1);
         UARTCharPut(UART0_BASE, 0xff);
     }
+    led_off(GPIO_PIN_1);
+    led_off(GPIO_PIN_3);
+    // receive parity
+    b1 = UARTCharGet(UART0_BASE);
+    UARTCharPut(UART0_BASE, 0xff);
+    if (b1 == parity){
+        for(int i = 0;i< 3; i++){
+            led_on(GPIO_PIN_3);
+            delay(400000);
+            led_off(GPIO_PIN_3);
+            delay(400000);
+        }
+    }
+    else{
+        for(int i = 0;i< 3; i++){
+            led_on(GPIO_PIN_1);
+            delay(400000);
+            led_off(GPIO_PIN_1);
+            delay(400000);
+        } 
+    }
+
     uart_deinit();
     start_app();
 

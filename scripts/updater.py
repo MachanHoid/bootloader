@@ -46,10 +46,20 @@ with open(app_file, 'rb') as app:
 
 #sending app contents
 print('Sending App')
+parity = 0
+
+def parity_check(value):
+    result = 0
+    while (value):
+        result ^= value & 1
+        value >>= 1
+    return result
+
 with open(app_file, 'rb') as app:
     data = app.read()
     i = 0
     for byte in data:
+        parity ^= parity_check(byte)
         byte = bytearray([byte])
         ser2.write(byte)
         i+=1
@@ -69,4 +79,9 @@ if not(num_padding==0):
     if ack == b'\xff': 
         print(f'{num_padding} byte padding sent')
 print('App Sent Completed')
+# parity ^= 1
+ser2.write(bytearray([parity & 0xFF]))
+ack = ser2.read(1)
+if ack == b'\xff': 
+    print(f'parity sent: {parity}')
 ser2.close()
