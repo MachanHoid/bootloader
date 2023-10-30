@@ -78,13 +78,24 @@ void erase_approm(int block_size){ //block size in bytes
     }
 }
 
-uint32_t parity_check(uint32_t value){
-    uint32_t result = 0;
-    while (value) {
-        result ^= value & 1;
-        value >>= 1;
+uint32_t crc32_update(uint32_t seed, uint32_t val, uint32_t poly){
+    seed = (uint64_t) seed;
+    poly = (uint64_t) poly;
+
+    seed <<= 8;
+    seed += val;
+    poly <<= 8;
+
+    for(int i = 0; i<8; i++){
+        if(seed & (0x80000000 << 8) != 0){
+            seed <<= 1;
+            seed ^= poly;
+        }
+        else{
+            seed <<= 1;
+        }
     }
-    return result;
+    return (uint32_t)((seed >> 8) & (0xFFFFFFFF));
 }
 
 int main(void){
@@ -123,6 +134,9 @@ int main(void){
         led_on(GPIO_PIN_2);
     }
     
+    uint32_t crc_seed = 0x0;
+    uint32_t crc_poly = 0x04c11db7;
+
     uint32_t msg;
     uint32_t b1;
     uint32_t b2;
@@ -148,7 +162,10 @@ int main(void){
         b3 = UARTCharGet(UART0_BASE);
         b4 = UARTCharGet(UART0_BASE);
         msg = (b4<<24)| (b3<<16) | (b2<<8) | b1;
-        parity ^= parity_check(msg);
+        crc_seed = crc32_update(crc_seed, b1, crc_poly);
+        crc_seed = crc32_update(crc_seed, b2, crc_poly);
+        crc_seed = crc32_update(crc_seed, b3, crc_poly);
+        crc_seed = crc32_update(crc_seed, b4, crc_poly);
 
         int flashflag = FlashProgram(&msg, approm_start + bytes_received, 4);
         bytes_received += 4; 
@@ -158,10 +175,18 @@ int main(void){
     }
     led_off(GPIO_PIN_1);
     led_off(GPIO_PIN_3);
-    // receive parity
+    // receive crc_checksum
     b1 = UARTCharGet(UART0_BASE);
+    b2 = UARTCharGet(UART0_BASE);
+    b3 = UARTCharGet(UART0_BASE);
+    b4 = UARTCharGet(UART0_BASE);
+    msg = (b4<<24)| (b3<<16) | (b2<<8) | b1;
+    crc_seed = crc32_update(crc_seed, b1, crc_poly);
+    crc_seed = crc32_update(crc_seed, b2, crc_poly);
+    crc_seed = crc32_update(crc_seed, b3, crc_poly);
+    crc_seed = crc32_update(crc_seed, b4, crc_poly);
     UARTCharPut(UART0_BASE, 0xff);
-    if (b1 == parity){
+    if (crc_seed == 0x0){
         for(int i = 0;i< 3; i++){
             led_on(GPIO_PIN_3);
             delay(400000);

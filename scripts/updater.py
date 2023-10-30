@@ -44,22 +44,27 @@ with open(app_file, 'rb') as app:
     if ack == b'\xff':
         print('File Length ACK Received')
 
+def crc32_update(seed, val, poly): #updates with every byte
+    seed <<= 8
+    seed += val
+    poly <<= 8
+    for _ in range(8):
+        if (seed & (0x80000000 << 8) != 0):
+            seed <<= 1
+            seed ^= poly
+        else:
+            seed <<=1
+    return ((seed >> 8) & (0xFFFFFFFF))
+
 #sending app contents
 print('Sending App')
-parity = 0
-
-def parity_check(value):
-    result = 0
-    while (value):
-        result ^= value & 1
-        value >>= 1
-    return result
-
+crc_seed = 0x0
+crc_poly = 0x04c11db7
 with open(app_file, 'rb') as app:
     data = app.read()
     i = 0
     for byte in data:
-        parity ^= parity_check(byte)
+        crc_seed = crc32_update(crc_seed, byte, crc_poly)
         byte = bytearray([byte])
         ser2.write(byte)
         i+=1
@@ -74,14 +79,26 @@ with open(app_file, 'rb') as app:
 num_padding = (4 - filelength%4) % 4
 for i in range(num_padding):
     ser2.write(b'\xff')
+    crc_seed = crc32_update(crc_seed, 0xff, crc_poly)
 if not(num_padding==0):
     ack = ser2.read(1)
     if ack == b'\xff': 
         print(f'{num_padding} byte padding sent')
 print('App Sent Completed')
-# parity ^= 1
-ser2.write(bytearray([parity & 0xFF]))
+#send 4 extra bytes to crc
+crc_seed = crc32_update(crc_seed, 0x0, crc_poly)
+crc_seed = crc32_update(crc_seed, 0x0, crc_poly)
+crc_seed = crc32_update(crc_seed, 0x0, crc_poly)
+crc_seed = crc32_update(crc_seed, 0x0, crc_poly)
+#send crc
+# crc_seed +=1
+crc_bytes = crc_seed.to_bytes(4, 'big')
+print(hex(crc_seed))
+for b in crc_bytes:
+    print(hex(b))
+    ser2.write(bytearray([b]))
+print('written')
 ack = ser2.read(1)
 if ack == b'\xff': 
-    print(f'parity sent: {parity}')
+    print(f'parity sent: {hex(crc_seed)}')
 ser2.close()
