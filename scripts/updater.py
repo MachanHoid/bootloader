@@ -91,14 +91,10 @@ crc_seed = crc32_update(crc_seed, 0x0, crc_poly)
 crc_seed = crc32_update(crc_seed, 0x0, crc_poly)
 crc_seed = crc32_update(crc_seed, 0x0, crc_poly)
 #send crc
-# crc_seed +=1
 crc_bytes = crc_seed.to_bytes(4, 'big')
-print(hex(crc_seed))
 for b in crc_bytes:
-    print(hex(b))
     ser2.write(bytearray([b]))
-print('written')
 ack = ser2.read(1)
 if ack == b'\xff': 
-    print(f'parity sent: {hex(crc_seed)}')
+    print(f'crc_checksum sent: {hex(crc_seed)}')
 ser2.close()

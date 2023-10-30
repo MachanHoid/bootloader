@@ -79,23 +79,23 @@ void erase_approm(int block_size){ //block size in bytes
 }
 
 uint32_t crc32_update(uint32_t seed, uint32_t val, uint32_t poly){
-    seed = (uint64_t) seed;
-    poly = (uint64_t) poly;
+    uint64_t seed64 = (uint64_t) seed;
+    uint64_t poly64 = (uint64_t) poly;
 
-    seed <<= 8;
-    seed += val;
-    poly <<= 8;
+    seed64 <<= 8;
+    seed64 += val;
+    poly64 <<= 8;
 
     for(int i = 0; i<8; i++){
-        if(seed & (0x80000000 << 8) != 0){
-            seed <<= 1;
-            seed ^= poly;
+        if((seed64 & (0x8000000000)) != 0){
+            seed64 <<= 1;
+            seed64 ^= poly64;
         }
         else{
-            seed <<= 1;
+            seed64 <<= 1;
         }
     }
-    return (uint32_t)((seed >> 8) & (0xFFFFFFFF));
+    return (uint32_t)((seed64 >> 8) & (0xFFFFFFFF));
 }
 
 int main(void){
@@ -180,7 +180,6 @@ int main(void){
     b2 = UARTCharGet(UART0_BASE);
     b3 = UARTCharGet(UART0_BASE);
     b4 = UARTCharGet(UART0_BASE);
-    msg = (b4<<24)| (b3<<16) | (b2<<8) | b1;
     crc_seed = crc32_update(crc_seed, b1, crc_poly);
     crc_seed = crc32_update(crc_seed, b2, crc_poly);
     crc_seed = crc32_update(crc_seed, b3, crc_poly);
