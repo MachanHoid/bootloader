@@ -50,10 +50,12 @@ void uart_deinit(){
 }
 
 static void branch_to_app(uint32_t pc, uint32_t sp) {
-    __asm("           \n\
-          msr msp, r1 /* load r1 into MSP */\n\
-          bx r0       /* branch to the address at r0 */\n\
-    ");
+    __asm volatile(
+        "msr msp, %[sp]\n\t" // Load sp into MSP
+        "bx %[pc]\n\t"      // Branch to the address at pc
+        :
+        : [sp] "r" (sp), [pc] "r" (pc)
+    );
 }
 
 void start_app(void){
