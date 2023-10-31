@@ -1,7 +1,7 @@
 dependancy_path:= .
 updater_file = scripts/updater.py
 
-all : create_build_dir prepare_shared shared bootloader app mass_erase upload_bootloader upload_shared 
+all : create_build_dir prepare_shared shared bootloader app  upload_bootloader upload_shared 
 
 create_build_dir:
 	@mkdir -p build/linkers_temp
