@@ -79,6 +79,11 @@ void erase_approm(int block_size){ //block size in bytes
         FlashErase(approm_start+ i*block_size);
     }
 }
+struct unsigned_int64
+{
+    /* data */
+    uint64_t seed64
+};
 
 uint32_t crc32_update(uint32_t seed, uint32_t val, uint32_t poly){
     uint64_t seed64 = (uint64_t) seed;

@@ -13,10 +13,14 @@
 #include "driverlib/uart.h"
 #include "utils/uartstdio.h"
 #include "driverlib/flash.h"
+#include "shared.h"
 
-int check_if_sharedram_working[100];
+// int check_if_sharedram_working[100];
+
 
 void delay( int n){
+    struct checkStruct name_of_struct;
+    name_of_struct.length = 10;
     for(volatile int i = 0; i<n; i++);
 }
 

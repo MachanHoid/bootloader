@@ -1,7 +1,7 @@
 dependancy_path:= .
 updater_file = scripts/updater.py
 
-all : create_build_dir prepare_shared shared bootloader app upload_bootloader upload_shared 
+all : create_build_dir prepare_shared shared bootloader app mass_erase upload_bootloader upload_shared 
 
 create_build_dir:
 	@mkdir -p build/linkers_temp
@@ -29,6 +29,8 @@ bootloader:
 
 app:
 	make -f makefiles/app.mak
+mass_erase:
+	sudo openocd -f /usr/share/openocd/scripts/board/ek-tm4c123gxl.cfg -c "init; halt; sleep 100; flash erase_address 0 0x40000; exit"
 
 upload_bootloader:
 	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program outputs/boot.elf verify reset exit"
