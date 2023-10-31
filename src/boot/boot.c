@@ -15,8 +15,8 @@
 #include "driverlib/flash.h"
 
 
-#define FLASH_LOCATION_APP_SIZE 0x17000
-#define FLASH_LOCATION_APP_CHKSUM 0x17500
+#define FLASH_LOCATION_APP_SIZE 0x29000
+#define FLASH_LOCATION_APP_CHKSUM 0x29500
 #define ACK 0xff
 
 #define BLOCK_SIZE 1024
@@ -59,11 +59,19 @@ static void uart_init(){
 /**
  * Deinitialize UART
 */
-void uart_deinit(){
-    UARTDisable(UART0_BASE);
-    SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOA);
-    SysCtlPeripheralDisable(SYSCTL_PERIPH_UART0);
-}
+// void uart_deinit(){
+//     UARTDisable(UART0_BASE);
+//     SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOA);
+//     SysCtlPeripheralDisable(SYSCTL_PERIPH_UART0);
+
+//     led_off(GPIO_PIN_1);
+//     led_on(GPIO_PIN_2);
+//     led_on(GPIO_PIN_3);
+//     delay(400000);
+//     led_off(GPIO_PIN_1);
+//     led_off(GPIO_PIN_2);
+//     led_off(GPIO_PIN_3);
+// }
 
 
 /**
@@ -127,10 +135,10 @@ bool verify_firmware()
     }
 
     msg = checksum;
-    b1 = (msg >> 0) & 0xFF;
-    b2 = (msg >> 8) & 0xFF;
-    b3 = (msg >> 16) & 0xFF;
-    b4 = (msg >> 24) & 0xFF;
+    b1 = (msg >> 24) & 0xFF;
+    b2 = (msg >> 16) & 0xFF;
+    b3 = (msg >> 8) & 0xFF;
+    b4 = (msg >> 0) & 0xFF;
 
     crc_seed = crc32_update(crc_seed, b1, crc_poly);
     crc_seed = crc32_update(crc_seed, b2, crc_poly);
@@ -304,6 +312,7 @@ int main(void){
     }
 
     led_off(GPIO_PIN_1);  led_off(GPIO_PIN_3);
+    delay(400000);
 
     // receive crc_checksum
     b1 = (uint32_t)UARTCharGet(UART0_BASE);
@@ -322,8 +331,11 @@ int main(void){
     // Respond ACK for receiving checksum
     UARTCharPut(UART0_BASE, 0xff);
 
+    led_off(GPIO_PIN_1);  led_off(GPIO_PIN_3);
+    delay(400000);
+
     // Deinitialize UART and start APP
-    uart_deinit();
+    // uart_deinit();
     start_app();
 
     // should never be reached
