@@ -14,14 +14,27 @@
 #include "utils/uartstdio.h"
 #include "driverlib/flash.h"
 
-//defining variables
+
+#define FLASH_LOCATION_APP_SIZE 0x17000
+#define FLASH_LOCATION_APP_CHKSUM 0x17500
+#define ACK 0xff
+
+#define BLOCK_SIZE 1024
+
+
+//defining memory map variables
 uint32_t approm_start = &__approm_start__;
 uint32_t approm_size = &__approm_size__;
 uint32_t bootrom_start = &__bootrom_start__;
 uint32_t bootrom_size = &__bootrom_size__;
 
-extern int check_if_sharedram_working[];
+/*
+    extern int check_if_sharedram_working[];
+*/
 
+/**
+ * Setting up UART
+*/
 static void uart_init(){
     //no need sysctlclockset?
     // Tiva Ports configuration
@@ -43,41 +56,19 @@ static void uart_init(){
                                 UART_CONFIG_PAR_NONE));
 }
 
+/**
+ * Deinitialize UART
+*/
 void uart_deinit(){
     UARTDisable(UART0_BASE);
     SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOA);
     SysCtlPeripheralDisable(SYSCTL_PERIPH_UART0);
 }
 
-static void branch_to_app(uint32_t pc, uint32_t sp) {
-    __asm("           \n\
-          msr msp, r1 /* load r1 into MSP */\n\
-          bx r0       /* branch to the address at r0 */\n\
-    ");
-}
 
-void start_app(void){
-    uint32_t *app_code = (uint32_t *) approm_start;
-    uint32_t app_sp = app_code[0];
-    uint32_t app_start = app_code[1];
-
-    //VTOR can only be accessed from privileged mode?
-    //specifying the start of the approm to be the offset for vector table
-    uint32_t *app_vector_table = (uint32_t *) approm_start;
-    //specifying the vtor location
-    uint32_t *vtor = (uint32_t *)0xE000ED08;
-    //writing offset to vtor. the bitwise & is to allign it to 1024 bytes as there are 134 interupts. last 10 bits are reserved.
-    *vtor = ((uint32_t) app_vector_table & 0xFFFFFC00);
-
-    branch_to_app(app_start, app_sp);
-}
-
-void erase_approm(int block_size){ //block size in bytes
-    for(int i = 0; i< (approm_size/block_size); i++){
-        FlashErase(approm_start+ i*block_size);
-    }
-}
-
+/**
+ * CRC Update
+*/
 uint32_t crc32_update(uint32_t seed, uint32_t val, uint32_t poly){
     uint64_t seed64 = (uint64_t) seed;
     uint64_t poly64 = (uint64_t) poly;
@@ -98,113 +89,244 @@ uint32_t crc32_update(uint32_t seed, uint32_t val, uint32_t poly){
     return (uint32_t)((seed64 >> 8) & (0xFFFFFFFF));
 }
 
-int main(void){
-    led_setup();
-    //configure serial communication
-    uart_init();
 
-    //ack
-    int32_t ack;
-    int ack_limit = 100;
-    int app_update_flag = 0;
-    for (int num_ack_tries = 0; num_ack_tries < ack_limit; num_ack_tries++){
-        if(UARTCharsAvail(UART0_BASE)){
-            ack = UARTCharGetNonBlocking(UART0_BASE);
-        }
-        led_on(GPIO_PIN_2);
-        delay(40000);
-        led_off(GPIO_PIN_2);
-        delay(40000);
+/**
+ * Verify Firmware image
+*/
+bool verify_firmware()
+{
+    uint32_t *applen_loc = (uint32_t *)FLASH_LOCATION_APP_SIZE;
+    uint32_t applen = *applen_loc;
 
-        if(ack == 0xff){
-            UARTCharPut(UART0_BASE, 0xff);
-            app_update_flag = 1;
-            break;
-        }
-    }
+    uint32_t *checksum_loc = (uint32_t *)FLASH_LOCATION_APP_CHKSUM;
+    uint32_t checksum = *checksum_loc;
 
-    // if(check_if_sharedram_working == 10){
-    //     led_on(GPIO_PIN_1);
-    //     delay(40000);
-    //     led_off(GPIO_PIN_1);
-    // }
-
-    if(!app_update_flag) {
-        start_app();
-        led_on(GPIO_PIN_2);
-    }
-    
     uint32_t crc_seed = 0x0;
     uint32_t crc_poly = 0x04c11db7;
+
+    uint32_t *app_code = (uint32_t *) approm_start;
 
     uint32_t msg;
     uint32_t b1;
     uint32_t b2;
     uint32_t b3;
     uint32_t b4;
-    
-    //receive file length
-    b1 = UARTCharGet(UART0_BASE);
-    b2 = UARTCharGet(UART0_BASE);
-    b3 = UARTCharGet(UART0_BASE);
-    b4 = UARTCharGet(UART0_BASE); 
-    uint32_t applen = (b4<<24)| (b3<<16) | (b2<<8) | b1;
-    UARTCharPut(UART0_BASE, 0xff);
-    
-    uint32_t bytes_received = 0;
 
-    erase_approm(1024);
-    uint32_t parity = 0;
-    while (bytes_received < applen)
+    for (uint32_t i = 0; i < applen; i++)
     {
-        b1 = UARTCharGet(UART0_BASE);
-        b2 = UARTCharGet(UART0_BASE);
-        b3 = UARTCharGet(UART0_BASE);
-        b4 = UARTCharGet(UART0_BASE);
-        msg = (b4<<24)| (b3<<16) | (b2<<8) | b1;
+        msg = app_code[i];
+        b1 = (msg >> 0) & 0xFF;
+        b2 = (msg >> 8) & 0xFF;
+        b3 = (msg >> 16) & 0xFF;
+        b4 = (msg >> 24) & 0xFF;
+
         crc_seed = crc32_update(crc_seed, b1, crc_poly);
         crc_seed = crc32_update(crc_seed, b2, crc_poly);
         crc_seed = crc32_update(crc_seed, b3, crc_poly);
         crc_seed = crc32_update(crc_seed, b4, crc_poly);
-
-        int flashflag = FlashProgram(&msg, approm_start + bytes_received, 4);
-        bytes_received += 4; 
-        if(flashflag==0)led_on(GPIO_PIN_3);
-        if(flashflag==-1)led_on(GPIO_PIN_1);
-        UARTCharPut(UART0_BASE, 0xff);
     }
-    led_off(GPIO_PIN_1);
-    led_off(GPIO_PIN_3);
-    // receive crc_checksum
-    b1 = UARTCharGet(UART0_BASE);
-    b2 = UARTCharGet(UART0_BASE);
-    b3 = UARTCharGet(UART0_BASE);
-    b4 = UARTCharGet(UART0_BASE);
+
+    msg = checksum;
+    b1 = (msg >> 0) & 0xFF;
+    b2 = (msg >> 8) & 0xFF;
+    b3 = (msg >> 16) & 0xFF;
+    b4 = (msg >> 24) & 0xFF;
+
     crc_seed = crc32_update(crc_seed, b1, crc_poly);
     crc_seed = crc32_update(crc_seed, b2, crc_poly);
     crc_seed = crc32_update(crc_seed, b3, crc_poly);
     crc_seed = crc32_update(crc_seed, b4, crc_poly);
-    UARTCharPut(UART0_BASE, 0xff);
-    if (crc_seed == 0x0){
-        for(int i = 0;i< 3; i++){
-            led_on(GPIO_PIN_3);
-            delay(400000);
-            led_off(GPIO_PIN_3);
-            delay(400000);
-        }
+
+    return (crc_seed == 0x00);
+}
+
+static void branch_to_app(uint32_t pc, uint32_t sp) {
+    __asm volatile(
+        "msr msp, %[sp]\n\t" // Load sp into MSP
+        "bx %[pc]\n\t"      // Branch to the address at pc
+        :
+        : [sp] "r" (sp), [pc] "r" (pc)
+    );
+}
+
+void start_app(void){
+
+    if (!verify_firmware())
+    {
+        led_on(GPIO_PIN_1);
+        led_off(GPIO_PIN_2);
+        led_off(GPIO_PIN_3);
+        while (true);
     }
     else{
-        for(int i = 0;i< 3; i++){
-            led_on(GPIO_PIN_1);
-            delay(400000);
-            led_off(GPIO_PIN_1);
-            delay(400000);
-        } 
+        led_on(GPIO_PIN_1);
+        led_on(GPIO_PIN_2);
+        led_on(GPIO_PIN_3);
+        delay(400000);
+        led_off(GPIO_PIN_1);
+        led_off(GPIO_PIN_2);
+        led_off(GPIO_PIN_3);
+        // while (true);
     }
 
+    uint32_t *app_code = (uint32_t *) approm_start;
+    uint32_t app_sp = app_code[0];
+    uint32_t app_start = app_code[1];
+
+    //VTOR can only be accessed from privileged mode?
+    //specifying the start of the approm to be the offset for vector table
+    uint32_t *app_vector_table = (uint32_t *) approm_start;
+    //specifying the vtor location
+    uint32_t *vtor = (uint32_t *)0xE000ED08;
+    //writing offset to vtor. the bitwise & is to allign it to 1024 bytes as there are 134 interupts. last 10 bits are reserved.
+    *vtor = ((uint32_t) app_vector_table & 0xFFFFFC00);
+
+    branch_to_app(app_start, app_sp);
+}
+
+
+
+/**
+ * Erase Flash
+*/
+void erase_approm()
+{ 
+    
+    for(int i = 0; i < (approm_size / BLOCK_SIZE) + 1; i++)
+    {
+        FlashErase(approm_start + i * BLOCK_SIZE);
+    }
+}
+
+
+
+
+
+int main(void){
+
+    // setup LED
+    led_setup();
+    
+    //configure serial communication
+    uart_init();
+
+    //Set if app is getting updated
+    bool app_update_flag = false; 
+
+    //Check whether bootloader is receiving any update
+    uint16_t ack_limit = 100;
+
+    for (uint16_t num_ack_tries = 0; num_ack_tries < ack_limit; num_ack_tries++)
+    {
+
+        int32_t ack_receive_byte;
+
+        if(UARTCharsAvail(UART0_BASE)){
+            ack_receive_byte = UARTCharGetNonBlocking(UART0_BASE);
+        }
+        
+        led_on(GPIO_PIN_2);
+        delay(40000);
+        led_off(GPIO_PIN_2);
+        delay(40000);
+
+        if(ack_receive_byte == ACK){
+            UARTCharPut(UART0_BASE, ACK);
+            app_update_flag = true;
+            break;
+        }
+    }
+
+
+/*
+    if(check_if_sharedram_working == 10){
+        led_on(GPIO_PIN_1);
+        delay(40000);
+        led_off(GPIO_PIN_1);
+    }
+*/
+
+    // if not getting updated, start the app
+    if(!app_update_flag)
+        start_app();
+    
+    // variables to store received bytes
+    uint32_t msg;
+    uint32_t b1;
+    uint32_t b2;
+    uint32_t b3;
+    uint32_t b4;
+
+    // variable that stores whether flash is programmed properly or not
+    int32_t flashflag;
+
+    // receive app length
+    b1 = (uint32_t)UARTCharGet(UART0_BASE);
+    b2 = (uint32_t)UARTCharGet(UART0_BASE);
+    b3 = (uint32_t)UARTCharGet(UART0_BASE);
+    b4 = (uint32_t)UARTCharGet(UART0_BASE); 
+    msg = (b4<<24)| (b3<<16) | (b2<<8) | b1;
+    uint32_t applen = msg;
+
+    // Store the app length in Flash
+    // If Flash program fails, blink red color
+    flashflag = FlashProgram(&applen, FLASH_LOCATION_APP_SIZE, 4);
+    if(flashflag == 0)      {    led_on(GPIO_PIN_3); led_off(GPIO_PIN_1);}
+    else if(flashflag ==-1) {    led_on(GPIO_PIN_1); led_off(GPIO_PIN_3); delay(400000); }
+
+    // Respond ACK for receiving flash length
+    UARTCharPut(UART0_BASE, ACK);
+    
+    //Erase APP Flash
+    erase_approm();
+
+    // variable to check number of bytes received
+    uint32_t bytes_received = 0;
+
+    // Receive app
+    while (bytes_received < applen)
+    {
+        b1 = (uint32_t)UARTCharGet(UART0_BASE);
+        b2 = (uint32_t)UARTCharGet(UART0_BASE);
+        b3 = (uint32_t)UARTCharGet(UART0_BASE);
+        b4 = (uint32_t)UARTCharGet(UART0_BASE);
+        msg = (b4<<24)| (b3<<16) | (b2<<8) | b1;
+
+        // Store app in Flash
+        // If Flash program fails, blink red color
+        flashflag = FlashProgram(&msg, approm_start + bytes_received, 4);
+        if(flashflag == 0)      {    led_on(GPIO_PIN_3); led_off(GPIO_PIN_1);}
+        else if(flashflag ==-1) {    led_on(GPIO_PIN_1); led_off(GPIO_PIN_3); delay(400000); }
+
+        // Respond ACK for receiving bytes
+        UARTCharPut(UART0_BASE, ACK);
+        bytes_received += 4; 
+    }
+
+    led_off(GPIO_PIN_1);  led_off(GPIO_PIN_3);
+
+    // receive crc_checksum
+    b1 = (uint32_t)UARTCharGet(UART0_BASE);
+    b2 = (uint32_t)UARTCharGet(UART0_BASE);
+    b3 = (uint32_t)UARTCharGet(UART0_BASE);
+    b4 = (uint32_t)UARTCharGet(UART0_BASE);
+    msg = (b4<<24)| (b3<<16) | (b2<<8) | b1;
+    uint32_t checksum = msg;
+
+    // Store checksum in Flash
+    // If Flash program fails, blink red color
+    flashflag = FlashProgram(&checksum, FLASH_LOCATION_APP_CHKSUM, 4);
+    if(flashflag == 0)      {    led_on(GPIO_PIN_3); led_off(GPIO_PIN_1);}
+    else if(flashflag ==-1) {    led_on(GPIO_PIN_1); led_off(GPIO_PIN_3); delay(400000); }
+
+    // Respond ACK for receiving checksum
+    UARTCharPut(UART0_BASE, 0xff);
+
+    // Deinitialize UART and start APP
     uart_deinit();
     start_app();
 
     // should never be reached
     while (1);
+
 }
