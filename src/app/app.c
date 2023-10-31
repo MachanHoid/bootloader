@@ -66,10 +66,10 @@ main(void)
     led_setup();
     delay(20000);
 
-    if (name_of_struct.length == 10)
-    {
-        delay(100);
-    }
+    // if (name_of_struct.length == 10)
+    // {
+    //     delay(100);
+    // }
     // for (int i = 0; i < 100; i++){
     //     if(name_of_struct.length == 10){
     //         led_on(GPIO_PIN_1);

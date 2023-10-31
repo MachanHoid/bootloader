@@ -19,8 +19,8 @@
 
 
 void delay( int n){
-    struct checkStruct name_of_struct;
-    name_of_struct.length = 10;
+    // struct checkStruct name_of_struct;
+    // name_of_struct.length = 10;
     for(volatile int i = 0; i<n; i++);
 }
 
