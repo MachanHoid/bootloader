@@ -60,30 +60,42 @@ def crc32_update(seed, val, poly): #updates with every byte
 print('Sending App')
 crc_seed = 0x0
 crc_poly = 0x04c11db7
+byte0 = 0xa5
+byte5 = 0x5a
 with open(app_file, 'rb') as app:
     data = app.read()
     i = 0
     for byte in data:
+        if i%4==0:
+            ser2.write(bytearray([byte0]))
         crc_seed = crc32_update(crc_seed, byte, crc_poly)
         byte = bytearray([byte])
         ser2.write(byte)
         i+=1
         #receiving ack every 4 bytes
         if i%4 == 0:
+            ser2.write(bytearray([byte5]))
             ack = ser2.read(1)
             if ack == b'\xff':
                 print(f'{i} Bytes Sent')
+            elif ack == b'\x55':
+                print('padding bytes not correct')
+                break
         time.sleep(0.0001)
+        
 
 #padding as bootloader expects 4 byte bursts
 num_padding = (4 - filelength%4) % 4
 for i in range(num_padding):
     ser2.write(b'\xff')
     crc_seed = crc32_update(crc_seed, 0xff, crc_poly)
+ser2.write(bytearray([byte5]))
 if not(num_padding==0):
     ack = ser2.read(1)
     if ack == b'\xff': 
         print(f'{num_padding} byte padding sent')
+    elif ack == b'\x55':
+        print('padding bytes not correct')
 print('App Sent Completed')
 #send 4 extra bytes to crc
 crc_seed = crc32_update(crc_seed, 0x0, crc_poly)

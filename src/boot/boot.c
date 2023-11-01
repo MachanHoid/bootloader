@@ -18,6 +18,7 @@
 #define FLASH_LOCATION_APP_SIZE 0x29000
 #define FLASH_LOCATION_APP_CHKSUM 0x29500
 #define ACK 0xff
+#define NACK 0x55
 
 #define BLOCK_SIZE 1024
 
@@ -161,10 +162,12 @@ void start_app(void){
 
     if (!verify_firmware())
     {
+
         led_on(GPIO_PIN_1);
         led_off(GPIO_PIN_2);
         led_off(GPIO_PIN_3);
-        while (true);
+        blink(GPIO_PIN_1, 4, 400000);
+        // while (true);
     }
     else{
         led_on(GPIO_PIN_1);
@@ -260,10 +263,12 @@ int main(void){
     
     // variables to store received bytes
     uint32_t msg;
+    uint32_t b0;
     uint32_t b1;
     uint32_t b2;
     uint32_t b3;
     uint32_t b4;
+    uint32_t b5;
 
     // variable that stores whether flash is programmed properly or not
     int32_t flashflag;
@@ -294,21 +299,34 @@ int main(void){
     // Receive app
     while (bytes_received < applen)
     {
+        b0 = (uint32_t)UARTCharGet(UART0_BASE);
         b1 = (uint32_t)UARTCharGet(UART0_BASE);
         b2 = (uint32_t)UARTCharGet(UART0_BASE);
         b3 = (uint32_t)UARTCharGet(UART0_BASE);
         b4 = (uint32_t)UARTCharGet(UART0_BASE);
+        b5 = (uint32_t)UARTCharGet(UART0_BASE);
         msg = (b4<<24)| (b3<<16) | (b2<<8) | b1;
 
-        // Store app in Flash
-        // If Flash program fails, blink red color
-        flashflag = FlashProgram(&msg, approm_start + bytes_received, 4);
-        if(flashflag == 0)      {    led_on(GPIO_PIN_3); led_off(GPIO_PIN_1);}
-        else if(flashflag ==-1) {    led_on(GPIO_PIN_1); led_off(GPIO_PIN_3); delay(400000); }
+        if((b0 == 0xa5) & (b5 == 0x5a)){
+            // Store app in Flash
+            // If Flash program fails, blink red color
+            flashflag = FlashProgram(&msg, approm_start + bytes_received, 4);
+            if(flashflag == 0)      {    led_on(GPIO_PIN_3); led_off(GPIO_PIN_1);}
+            else if(flashflag ==-1) {    led_on(GPIO_PIN_1); led_off(GPIO_PIN_3); delay(400000); }
 
-        // Respond ACK for receiving bytes
-        UARTCharPut(UART0_BASE, ACK);
-        bytes_received += 4; 
+            // Respond ACK for receiving bytes
+            UARTCharPut(UART0_BASE, ACK);
+            bytes_received += 4; 
+        }
+        else{
+            UARTCharPut(UART0_BASE, NACK); 
+            while(true){
+                led_on(GPIO_PIN_1);
+                delay(400000);
+                led_off(GPIO_PIN_1);
+                delay(400000);
+            }
+        }
     }
 
     led_off(GPIO_PIN_1);  led_off(GPIO_PIN_3);
