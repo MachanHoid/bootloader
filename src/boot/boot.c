@@ -51,7 +51,7 @@ static void uart_init(){
 
     // UART setup, keeping 9600 baud rate
     UARTConfigSetExpClk(UART0_BASE, SysCtlClockGet(), 9600,
-                                (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE |
+                                (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_TWO |
                                 UART_CONFIG_PAR_NONE));
 }
 

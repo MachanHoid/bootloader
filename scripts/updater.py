@@ -8,7 +8,7 @@ port = config['mcu_port']
 
 app_file = 'outputs/app.bin'
 #Initialising handshake
-ser = serial.Serial(port, 9600, timeout=1)
+ser = serial.Serial(port, 9600, timeout=1, stopbits=2)
 while True:
     ser.write(b'\xff')
     ack = ser.read(1)
@@ -18,7 +18,7 @@ while True:
         break
 ser.close()
 #sending app
-ser2 = serial.Serial(port, 9600)
+ser2 = serial.Serial(port, 9600, stopbits=2)
 print('Sending File length')
 with open(app_file, 'rb') as app:
     filebytes = app.read()
