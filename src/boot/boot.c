@@ -14,20 +14,18 @@
 #include "utils/uartstdio.h"
 #include "driverlib/flash.h"
 
-
-#define FLASH_LOCATION_APP_SIZE 0x29000
-#define FLASH_LOCATION_APP_CHKSUM 0x29500
-#define ACK 0xff
-#define NACK 0x55
-
-#define BLOCK_SIZE 1024
-
-
 //defining memory map variables
 uint32_t approm_start = &__approm_start__;
 uint32_t approm_size = &__approm_size__;
 uint32_t bootrom_start = &__bootrom_start__;
 uint32_t bootrom_size = &__bootrom_size__;
+uint32_t appheader_start = &__appheader_start__;
+uint32_t appheader_size = &__appheader_size__;
+
+#define ACK 0xff
+#define NACK 0x55
+
+#define BLOCK_SIZE 1024
 
 /*
     extern int check_if_sharedram_working[];
@@ -104,10 +102,10 @@ uint32_t crc32_update(uint32_t seed, uint32_t val, uint32_t poly){
 */
 bool verify_firmware()
 {
-    uint32_t *applen_loc = (uint32_t *)FLASH_LOCATION_APP_SIZE;
+    uint32_t *applen_loc = (uint32_t *)appheader_start;
     uint32_t applen = *applen_loc;
 
-    uint32_t *checksum_loc = (uint32_t *)FLASH_LOCATION_APP_CHKSUM;
+    uint32_t *checksum_loc = (uint32_t *)(appheader_start + 0x500);
     uint32_t checksum = *checksum_loc;
 
     uint32_t crc_seed = 0x0;
@@ -283,7 +281,7 @@ int main(void){
 
     // Store the app length in Flash
     // If Flash program fails, blink red color
-    flashflag = FlashProgram(&applen, FLASH_LOCATION_APP_SIZE, 4);
+    flashflag = FlashProgram(&applen, appheader_start, 4);
     if(flashflag == 0)      {    led_on(GPIO_PIN_3); led_off(GPIO_PIN_1);}
     else if(flashflag ==-1) {    led_on(GPIO_PIN_1); led_off(GPIO_PIN_3); delay(400000); }
 
@@ -342,7 +340,7 @@ int main(void){
 
     // Store checksum in Flash
     // If Flash program fails, blink red color
-    flashflag = FlashProgram(&checksum, FLASH_LOCATION_APP_CHKSUM, 4);
+    flashflag = FlashProgram(&checksum, (appheader_start + 0x500), 4);
     if(flashflag == 0)      {    led_on(GPIO_PIN_3); led_off(GPIO_PIN_1);}
     else if(flashflag ==-1) {    led_on(GPIO_PIN_1); led_off(GPIO_PIN_3); delay(400000); }
 
