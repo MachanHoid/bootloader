@@ -45,3 +45,12 @@ transmit_app:
 clean:
 	rm -r build
 	rm -r outputs
+
+# debug:
+# 	openocd -s "/share/openocd/scripts" -f "board/ti_ek-tm4c123gxl.cfg" -c "program outputs/boot.elf verify reset exit"
+# 	openocd -s "/share/openocd/scripts" -f "board/ti_ek-tm4c123gxl.cfg" -c "program outputs/shared.elf verify reset exit"
+# 	python3 -u "${dependancy_path}/${updater_file}" 
+# 	open -a Terminal.app "openocd -s "/opt/homebrew/bin/openocd" -f /opt/homebrew/share/openocd/scripts/board/ti_ek-tm4c123gxl.cfg"
+# 	sleep 1
+# 	open -a Terminal.app "arm-none-eabi-gdb outputs/boot.elf"
+	

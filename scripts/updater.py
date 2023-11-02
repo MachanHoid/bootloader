@@ -103,7 +103,7 @@ crc_seed = crc32_update(crc_seed, 0x0, crc_poly)
 crc_seed = crc32_update(crc_seed, 0x0, crc_poly)
 crc_seed = crc32_update(crc_seed, 0x0, crc_poly)
 #send crc
-crc_bytes = crc_seed.to_bytes(4, 'big')
+crc_bytes = crc_seed.to_bytes(4, 'little')
 for b in crc_bytes:
     ser2.write(bytearray([b]))
 ack = ser2.read(1)
