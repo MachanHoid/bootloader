@@ -63,9 +63,10 @@ crc_poly = 0x04c11db7
 byte0 = 0xa5
 byte5 = 0x5a
 with open(app_file, 'rb') as app:
-    data = app.read()
     i = 0
-    for byte in data:
+    byte = app.read(1)
+    while (byte):
+        byte = int.from_bytes(byte)
         if i%4==0:
             ser2.write(bytearray([byte0]))
         crc_seed = crc32_update(crc_seed, byte, crc_poly)
@@ -80,7 +81,9 @@ with open(app_file, 'rb') as app:
                 print(f'{i} Bytes Sent')
             elif ack == b'\x55':
                 print('padding bytes not correct')
-                break
+                app.seek(-4, 1)
+                i -= 4
+        byte = app.read(1)
         time.sleep(0.0001)
         
 

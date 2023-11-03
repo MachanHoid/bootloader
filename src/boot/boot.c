@@ -318,12 +318,6 @@ int main(void){
         }
         else{
             UARTCharPut(UART0_BASE, NACK); 
-            while(true){
-                led_on(GPIO_PIN_1);
-                delay(400000);
-                led_off(GPIO_PIN_1);
-                delay(400000);
-            }
         }
     }
 

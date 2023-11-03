@@ -31,7 +31,7 @@ app:
 	make -f makefiles/app.mak
 
 mass_erase:
-	openocd -s "/share/openocd/scripts" -f "board/ti_ek-tm4c123gxl.cfg" -c "init; halt; sleep 100; flash erase_address 0 0x40000; exit"
+	openocd -s "/share/openocd/scripts" -f "board/ti_ek-tm4c123gxl.cfg" -c "init; halt; sleep 100; flash erase_address 0 0x40000; reset; exit"
 
 upload_bootloader:
 	openocd -s "/share/openocd/scripts" -f "board/ti_ek-tm4c123gxl.cfg" -c "program outputs/boot.elf verify reset exit"
