@@ -66,7 +66,7 @@ with open(app_file, 'rb') as app:
     i = 0
     byte = app.read(1)
     while (byte):
-        byte = int.from_bytes(byte)
+        byte = int.from_bytes(byte, byteorder = 'little')
         if i%4==0:
             ser2.write(bytearray([byte0]))
         crc_seed = crc32_update(crc_seed, byte, crc_poly)
