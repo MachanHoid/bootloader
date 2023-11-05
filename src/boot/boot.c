@@ -96,6 +96,14 @@ uint32_t crc32_update(uint32_t seed, uint32_t val, uint32_t poly){
     return (uint32_t)((seed64 >> 8) & (0xFFFFFFFF));
 }
 
+uint32_t parity_check(uint32_t value){
+    uint32_t result = 0;
+    while (value) {
+        result ^= value & 1;
+        value >>= 1;
+    }
+    return result;
+}
 
 /**
  * Verify Firmware image
@@ -198,17 +206,18 @@ void start_app(void){
 /**
  * Erase Flash
 */
-void erase_approm()
+void erase_app()
 { 
     
     for(int i = 0; i < (approm_size / BLOCK_SIZE) + 1; i++)
     {
         FlashErase(approm_start + i * BLOCK_SIZE);
     }
+    for(int i = 0; i < (appheader_size / BLOCK_SIZE) + 1; i++)
+    {
+        FlashErase(appheader_start + i * BLOCK_SIZE);
+    }
 }
-
-
-
 
 
 int main(void){
@@ -266,6 +275,7 @@ int main(void){
     uint32_t b2;
     uint32_t b3;
     uint32_t b4;
+    uint32_t parity;
     uint32_t b5;
 
     // variable that stores whether flash is programmed properly or not
@@ -289,7 +299,7 @@ int main(void){
     UARTCharPut(UART0_BASE, ACK);
     
     //Erase APP Flash
-    erase_approm();
+    erase_app();
 
     // variable to check number of bytes received
     uint32_t bytes_received = 0;
@@ -302,10 +312,11 @@ int main(void){
         b2 = (uint32_t)UARTCharGet(UART0_BASE);
         b3 = (uint32_t)UARTCharGet(UART0_BASE);
         b4 = (uint32_t)UARTCharGet(UART0_BASE);
+        parity = (uint32_t)UARTCharGet(UART0_BASE);
         b5 = (uint32_t)UARTCharGet(UART0_BASE);
         msg = (b4<<24)| (b3<<16) | (b2<<8) | b1;
 
-        if((b0 == 0xa5) & (b5 == 0x5a)){
+        if((b0 == 0xa5) & (b5 == 0x5a) & (parity == parity_check(msg))){
             // Store app in Flash
             // If Flash program fails, blink red color
             flashflag = FlashProgram(&msg, approm_start + bytes_received, 4);

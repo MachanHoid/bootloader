@@ -56,6 +56,13 @@ def crc32_update(seed, val, poly): #updates with every byte
             seed <<=1
     return ((seed >> 8) & (0xFFFFFFFF))
 
+def parity_check(value):
+    result = 0
+    while (value):
+        result ^= value & 1
+        value >>= 1
+    return result
+
 #sending app contents
 print('Sending App')
 crc_seed = 0x0
@@ -64,23 +71,29 @@ byte0 = 0xa5
 byte5 = 0x5a
 with open(app_file, 'rb') as app:
     i = 0
+    word = 0
     byte = app.read(1)
     while (byte):
         byte = int.from_bytes(byte, byteorder = 'little')
         if i%4==0:
             ser2.write(bytearray([byte0]))
+            word = 0
         crc_seed = crc32_update(crc_seed, byte, crc_poly)
+        word <<= 8
+        word += byte
         byte = bytearray([byte])
         ser2.write(byte)
         i+=1
         #receiving ack every 4 bytes
         if i%4 == 0:
+            parity = parity_check(word)
+            ser2.write(bytearray([parity]))
             ser2.write(bytearray([byte5]))
             ack = ser2.read(1)
             if ack == b'\xff':
                 print(f'{i} Bytes Sent')
             elif ack == b'\x55':
-                print('padding bytes not correct')
+                print('NACK')
                 app.seek(-4, 1)
                 i -= 4
         byte = app.read(1)
@@ -91,14 +104,19 @@ with open(app_file, 'rb') as app:
 num_padding = (4 - filelength%4) % 4
 for i in range(num_padding):
     ser2.write(b'\xff')
+    word <<= 8
+    word += 0xFF
     crc_seed = crc32_update(crc_seed, 0xff, crc_poly)
-ser2.write(bytearray([byte5]))
+
 if not(num_padding==0):
+    parity = parity_check(word)
+    ser2.write(bytearray([parity]))
+    ser2.write(bytearray([byte5]))
     ack = ser2.read(1)
     if ack == b'\xff': 
         print(f'{num_padding} byte padding sent')
     elif ack == b'\x55':
-        print('padding bytes not correct')
+        print('NACK')
 print('App Sent Completed')
 #send 4 extra bytes to crc
 crc_seed = crc32_update(crc_seed, 0x0, crc_poly)
