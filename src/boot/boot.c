@@ -281,6 +281,9 @@ int main(void){
     // variable that stores whether flash is programmed properly or not
     int32_t flashflag;
 
+    //Erase APP Flash
+    erase_app();
+
     // receive app length
     b1 = (uint32_t)UARTCharGet(UART0_BASE);
     b2 = (uint32_t)UARTCharGet(UART0_BASE);
@@ -297,9 +300,6 @@ int main(void){
 
     // Respond ACK for receiving flash length
     UARTCharPut(UART0_BASE, ACK);
-    
-    //Erase APP Flash
-    erase_app();
 
     // variable to check number of bytes received
     uint32_t bytes_received = 0;
