@@ -127,7 +127,7 @@ bool verify_firmware()
     uint32_t b3;
     uint32_t b4;
 
-    for (uint32_t i = 0; i < applen; i++)
+    for (uint32_t i = 0; i < (uint32_t)(applen/4); i++)
     {
         msg = app_code[i];
         b1 = (msg >> 0) & 0xFF;
@@ -141,18 +141,18 @@ bool verify_firmware()
         crc_seed = crc32_update(crc_seed, b4, crc_poly);
     }
 
-    msg = checksum;
-    b1 = (msg >> 24) & 0xFF;
-    b2 = (msg >> 16) & 0xFF;
-    b3 = (msg >> 8) & 0xFF;
-    b4 = (msg >> 0) & 0xFF;
+    // msg = checksum;
+    // b1 = (msg >> 0) & 0xFF;
+    // b2 = (msg >> 8) & 0xFF;
+    // b3 = (msg >> 16) & 0xFF;
+    // b4 = (msg >> 24) & 0xFF;
 
-    crc_seed = crc32_update(crc_seed, b1, crc_poly);
-    crc_seed = crc32_update(crc_seed, b2, crc_poly);
-    crc_seed = crc32_update(crc_seed, b3, crc_poly);
-    crc_seed = crc32_update(crc_seed, b4, crc_poly);
+    // crc_seed = crc32_update(crc_seed, b1, crc_poly);
+    // crc_seed = crc32_update(crc_seed, b2, crc_poly);
+    // crc_seed = crc32_update(crc_seed, b3, crc_poly);
+    // crc_seed = crc32_update(crc_seed, b4, crc_poly);
 
-    return (crc_seed == 0x00);
+    return (crc_seed == checksum);
 }
 
 static void branch_to_app(uint32_t pc, uint32_t sp) {

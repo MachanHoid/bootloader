@@ -23,12 +23,15 @@ print('Sending File length')
 with open(app_file, 'rb') as app:
     filebytes = app.read()
     filelength = len(filebytes)
+    print(filelength)
+    if filelength%4 != 0:
+        filelength_tobesent =filelength +  4 - filelength%4
     #send file length
     print(f'file length: {filelength}')
-    b1 = filelength & 0xFF
-    b2 = (filelength >> 8) & 0xFF 
-    b3 = (filelength >> 16) & 0xFF 
-    b4 = (filelength >> 24) & 0xFF 
+    b1 = filelength_tobesent & 0xFF
+    b2 = (filelength_tobesent >> 8) & 0xFF 
+    b3 = (filelength_tobesent >> 16) & 0xFF 
+    b4 = (filelength_tobesent >> 24) & 0xFF 
     b1 = bytearray([b1])
     b2 = bytearray([b2])
     b3 = bytearray([b3])

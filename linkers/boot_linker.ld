@@ -28,3 +28,5 @@ SECTIONS
         _bootebss = .;
     } > SRAM
 }
+
+PROVIDE (_estack = ORIGIN(SRAM) + LENGTH(SRAM));
