@@ -53,6 +53,20 @@ static void IntDefaultHandler(void);
 
 //*****************************************************************************
 //
+// The following are constructs created by the linker, indicating where the
+// the "data" and "bss" segments reside in memory.  The initializers for the
+// for the "data" segment resides immediately following the "text" segment.
+//
+//*****************************************************************************
+extern uint32_t _appldata;
+extern uint32_t _appdata;
+extern uint32_t _appedata;
+extern uint32_t _appbss;
+extern uint32_t _appebss;
+extern uint32_t _appestack;
+
+//*****************************************************************************
+//
 // The entry point for the application.
 //
 //*****************************************************************************
@@ -63,7 +77,7 @@ extern int main(void);
 // Reserve space for the system stack.
 //
 //*****************************************************************************
-static uint32_t pui32Stack[64];
+// static uint32_t pui32Stack[4096];
 
 //*****************************************************************************
 //
@@ -74,8 +88,8 @@ static uint32_t pui32Stack[64];
 __attribute__ ((section(".isr_vector")))
 void (* const g_pfnVectors[])(void) =
 {
-    (void (*)(void))((uint32_t)pui32Stack + sizeof(pui32Stack)),
-                                            // The initial stack pointer
+    // (void (*)(void))((uint32_t)pui32Stack + sizeof(pui32Stack)),
+    (void *)&_appestack,                       // The initial stack pointer
     ResetISR,                               // The reset handler
     NmiSR,                                  // The NMI handler
     FaultISR,                               // The hard fault handler
@@ -231,19 +245,6 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // PWM 1 Generator 3
     IntDefaultHandler                       // PWM 1 Fault
 };
-
-//*****************************************************************************
-//
-// The following are constructs created by the linker, indicating where the
-// the "data" and "bss" segments reside in memory.  The initializers for the
-// for the "data" segment resides immediately following the "text" segment.
-//
-//*****************************************************************************
-extern uint32_t _appldata;
-extern uint32_t _appdata;
-extern uint32_t _appedata;
-extern uint32_t _appbss;
-extern uint32_t _appebss;
 
 //*****************************************************************************
 //
