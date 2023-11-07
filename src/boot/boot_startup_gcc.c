@@ -53,6 +53,28 @@ static void IntDefaultHandler(void);
 
 //*****************************************************************************
 //
+// The following are constructs created by the linker, indicating where the
+// the "data" and "bss" segments reside in memory.  The initializers for the
+// for the "data" segment resides immediately following the "text" segment.
+//
+//*****************************************************************************
+extern uint32_t _bootldata;
+extern uint32_t _bootdata;
+extern uint32_t _bootedata;
+extern uint32_t _bootbss;
+extern uint32_t _bootebss;
+extern uint32_t _estack;
+
+#ifdef opt_bootloader
+extern uint32_t _sharedldata;
+extern uint32_t _shareddata;
+extern uint32_t _sharededata;
+extern uint32_t _sharedbss;
+extern uint32_t _sharedebss;
+#endif
+
+//*****************************************************************************
+//
 // The entry point for the application.
 //
 //*****************************************************************************
@@ -63,7 +85,7 @@ extern int main(void);
 // Reserve space for the system stack.
 //
 //*****************************************************************************
-static uint32_t pui32Stack[64];
+// static uint32_t pui32Stack[64];
 
 //*****************************************************************************
 //
@@ -74,8 +96,8 @@ static uint32_t pui32Stack[64];
 __attribute__ ((section(".isr_vector")))
 void (* const g_pfnVectors[])(void) =
 {
-    (void (*)(void))((uint32_t)pui32Stack + sizeof(pui32Stack)),
-                                            // The initial stack pointer
+    // (void (*)(void))((uint32_t)pui32Stack + sizeof(pui32Stack)),
+    (void *)&_estack,                       // The initial stack pointer
     ResetISR,                               // The reset handler
     NmiSR,                                  // The NMI handler
     FaultISR,                               // The hard fault handler
@@ -232,26 +254,7 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler                       // PWM 1 Fault
 };
 
-//*****************************************************************************
-//
-// The following are constructs created by the linker, indicating where the
-// the "data" and "bss" segments reside in memory.  The initializers for the
-// for the "data" segment resides immediately following the "text" segment.
-//
-//*****************************************************************************
-extern uint32_t _bootldata;
-extern uint32_t _bootdata;
-extern uint32_t _bootedata;
-extern uint32_t _bootbss;
-extern uint32_t _bootebss;
 
-#ifdef opt_bootloader
-extern uint32_t _sharedldata;
-extern uint32_t _shareddata;
-extern uint32_t _sharededata;
-extern uint32_t _sharedbss;
-extern uint32_t _sharedebss;
-#endif
 
 //*****************************************************************************
 //

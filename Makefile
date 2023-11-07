@@ -1,7 +1,7 @@
 dependancy_path:= .
 updater_file = scripts/updater.py
 
-all : create_build_dir prepare_shared shared bootloader app mass_erase upload_bootloader upload_shared 
+all : create_build_dir prepare_shared shared bootloader app  upload_bootloader upload_shared 
 
 create_build_dir:
 	@mkdir -p build/linkers_temp
@@ -29,14 +29,15 @@ bootloader:
 
 app:
 	make -f makefiles/app.mak
+
 mass_erase:
-	sudo openocd -f /usr/share/openocd/scripts/board/ek-tm4c123gxl.cfg -c "init; halt; sleep 100; flash erase_address 0 0x40000; exit"
+	openocd -s "/share/openocd/scripts" -f "board/ti_ek-tm4c123gxl.cfg" -c "init; halt; sleep 100; flash erase_address 0 0x40000; reset; exit"
 
 upload_bootloader:
-	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program outputs/boot.elf verify reset exit"
+	openocd -s "/share/openocd/scripts" -f "board/ti_ek-tm4c123gxl.cfg" -c "program outputs/boot.elf verify reset exit"
 
 upload_shared:
-	openocd -f board/ti_ek-tm4c123gxl.cfg -c "program outputs/shared.elf verify reset exit"
+	openocd -s "/share/openocd/scripts" -f "board/ti_ek-tm4c123gxl.cfg" -c "program outputs/shared.elf verify reset exit"
 	
 transmit_app:
 	python3 -u "${dependancy_path}/${updater_file}" 
@@ -44,3 +45,12 @@ transmit_app:
 clean:
 	rm -r build
 	rm -r outputs
+
+# debug:
+# 	openocd -s "/share/openocd/scripts" -f "board/ti_ek-tm4c123gxl.cfg" -c "program outputs/boot.elf verify reset exit"
+# 	openocd -s "/share/openocd/scripts" -f "board/ti_ek-tm4c123gxl.cfg" -c "program outputs/shared.elf verify reset exit"
+# 	python3 -u "${dependancy_path}/${updater_file}" 
+# 	open -a Terminal.app "openocd -s "/opt/homebrew/bin/openocd" -f /opt/homebrew/share/openocd/scripts/board/ti_ek-tm4c123gxl.cfg"
+# 	sleep 1
+# 	open -a Terminal.app "arm-none-eabi-gdb outputs/boot.elf"
+	
