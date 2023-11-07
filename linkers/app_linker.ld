@@ -18,7 +18,7 @@ SECTIONS
         *(vtable)
         *(.data*)
         _appedata = .;
-    } > SRAM
+    } > APPSRAM
 
     .bss :
     {
@@ -26,7 +26,7 @@ SECTIONS
         *(.bss*)
         *(COMMON)
         _appebss = .;
-    } > SRAM
+    } > APPSRAM
 }
 
-PROVIDE (_estack = ORIGIN(SRAM) + LENGTH(SRAM));
+PROVIDE (_appestack = ORIGIN(APPSRAM) + LENGTH(APPSRAM));
