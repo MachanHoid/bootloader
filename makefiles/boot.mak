@@ -17,33 +17,21 @@ all_files =${project_file}
 
 .PHONY: all clean upload soft_clean
 
-all:make_new_linker compile
-
-defines = TARGET_IS_TM4C123_RB1 \
-		PART_TM4C123GH6PM \
-		gcc \
-		opt_bootloader \
-
-includes = ${dependancy_path}/shared_libraries 
-
-CFLAGS = -nostdlib \
-		--specs=nosys.specs \
-		-mcpu=cortex-m4 \
-		-mfloat-abi=hard 
-
-CFLAGS += $(foreach i,$(includes),-I$(i))
-CFLAGS += $(foreach d,$(defines),-D $(d))
-
-CFLAGS +=  -T ${new_linker_file}
+all:make_new_linker link_bootloader 
 
 #makes new linker with links to the syms in shared.elf
 make_new_linker:
 	@cp $(linker_file) $(new_linker_file)
 	@echo 'INCLUDE build/linkers_temp/shared_syms.ld' >> $(new_linker_file)
 
-#compiles with new linker to create boot.elf and boot.bin
-compile: ${boot_files} 
-	@echo compiling
-	${compiler} ${CFLAGS}  $^ -o outputs/boot.elf
-	${ocpy} -O binary outputs/boot.elf outputs/boot.bin
+boot_obj_dir = build/obj_temp/boot_obj_temp
+boot_folder_escaped = src\/boot
+boot_obj_dir_escaped = build\/obj_temp\/boot_obj_temp
+boot_obj = $(foreach i,$(boot_files), $(shell echo $(i) | sed 's/$(boot_folder_escaped)/$(boot_obj_dir_escaped)/1; s/\.c/\.o/'))
 
+LFAGS = -T ${new_linker_file}
+LFAGS += --gc-sections
+
+link_bootloader: $(boot_obj)
+	@echo linking bootloader
+	$(linker) $(LFAGS) $^ -o outputs/boot.elf
