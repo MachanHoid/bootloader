@@ -18,7 +18,7 @@ SECTIONS
         *(vtable)
         *(.data*)
         _bootedata = .;
-    } > SRAM
+    } > BOOTSRAM
 
     .bss :
     {
@@ -26,7 +26,7 @@ SECTIONS
         *(.bss*)
         *(COMMON)
         _bootebss = .;
-    } > SRAM
+    } > BOOTSRAM
 }
 
-PROVIDE (_estack = ORIGIN(SRAM) + LENGTH(SRAM));
+PROVIDE (_bootestack = ORIGIN(BOOTSRAM) + LENGTH(BOOTSRAM));

@@ -63,7 +63,7 @@ extern uint32_t _bootdata;
 extern uint32_t _bootedata;
 extern uint32_t _bootbss;
 extern uint32_t _bootebss;
-extern uint32_t _estack;
+extern uint32_t _bootestack;
 
 #ifdef opt_bootloader
 extern uint32_t _sharedldata;
@@ -97,7 +97,7 @@ __attribute__ ((section(".isr_vector")))
 void (* const g_pfnVectors[])(void) =
 {
     // (void (*)(void))((uint32_t)pui32Stack + sizeof(pui32Stack)),
-    (void *)&_estack,                       // The initial stack pointer
+    (void *)&_bootestack,                       // The initial stack pointer
     ResetISR,                               // The reset handler
     NmiSR,                                  // The NMI handler
     FaultISR,                               // The hard fault handler

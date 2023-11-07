@@ -63,7 +63,7 @@ extern uint32_t _appdata;
 extern uint32_t _appedata;
 extern uint32_t _appbss;
 extern uint32_t _appebss;
-extern uint32_t _estack;
+extern uint32_t _appestack;
 
 //*****************************************************************************
 //
@@ -89,7 +89,7 @@ __attribute__ ((section(".isr_vector")))
 void (* const g_pfnVectors[])(void) =
 {
     // (void (*)(void))((uint32_t)pui32Stack + sizeof(pui32Stack)),
-    (void *)&_estack,                       // The initial stack pointer
+    (void *)&_appestack,                       // The initial stack pointer
     ResetISR,                               // The reset handler
     NmiSR,                                  // The NMI handler
     FaultISR,                               // The hard fault handler
