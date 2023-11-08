@@ -39,7 +39,8 @@ includes = ${dependancy_path}/shared_libraries \
 CFLAGS = -nostdlib \
 		--specs=nosys.specs \
 		-mcpu=cortex-m4 \
-		-mfloat-abi=hard 
+		-mfloat-abi=hard \
+		-g3 
 
 CFLAGS += $(foreach i,$(includes),-I$(i))
 CFLAGS += $(foreach d,$(defines),-D $(d))
@@ -53,6 +54,7 @@ SHAREDLIB_COMPILE_FLAGS = -nostdlib \
 						-ffunction-sections \
 						-fdata-sections \
 						-c -Wall\
+						-g3
 
 SHAREDLIB_COMPILE_FLAGS += $(foreach i,$(includes),-I$(i))
 SHAREDLIB_COMPILE_FLAGS += $(foreach d,$(defines),-D $(d))

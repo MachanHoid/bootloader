@@ -27,6 +27,7 @@ SHAREDLIB_COMPILE_FLAGS = -nostdlib \
 						-mfloat-abi=hard \
 						-ffunction-sections \
 						-c -Wall\
+						-g3
 
 SHAREDLIB_COMPILE_FLAGS += $(foreach i,$(includes),-I$(i))
 SHAREDLIB_COMPILE_FLAGS += $(foreach d,$(defines),-D $(d))
