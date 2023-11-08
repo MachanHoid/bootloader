@@ -97,7 +97,7 @@ __attribute__ ((section(".isr_vector")))
 void (* const g_pfnVectors[])(void) =
 {
     // (void (*)(void))((uint32_t)pui32Stack + sizeof(pui32Stack)),
-    (void *)&_bootestack,                       // The initial stack pointer
+    (void *)&_estack,                       // The initial stack pointer
     ResetISR,                               // The reset handler
     NmiSR,                                  // The NMI handler
     FaultISR,                               // The hard fault handler
