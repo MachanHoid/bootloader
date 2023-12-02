@@ -233,7 +233,7 @@ int main(void){
 
     //check wether malloc works
     int* ptr;
-    ptr = (int*)_sbrk(2 * sizeof(int));
+    ptr = (int*)malloc(2 * sizeof(int));
     ptr[0] = 10;
     ptr[1] = 20;
     if ((ptr[0] == 10) && (ptr[1] == 20)){

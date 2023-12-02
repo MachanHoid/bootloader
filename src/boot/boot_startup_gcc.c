@@ -396,7 +396,7 @@ IntDefaultHandler(void)
  */
 typedef char *caddr_t;
 
-caddr_t _sbrk (int incr)
+caddr_t malloc (int incr)
 {
     double current_sp;
     extern char end asm ("end"); /* Defined by linker */
