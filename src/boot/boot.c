@@ -231,6 +231,15 @@ int main(void){
     //Set if app is getting updated
     bool app_update_flag = false; 
 
+    //check wether malloc works
+    int* ptr;
+    ptr = (int*)_sbrk(2 * sizeof(int));
+    ptr[0] = 10;
+    ptr[1] = 20;
+    if ((ptr[0] == 10) && (ptr[1] == 20)){
+        blink(GPIO_PIN_3, 4, 40000);
+    }
+
     //Check whether bootloader is receiving any update
     uint16_t ack_limit = 100;
 

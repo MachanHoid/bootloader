@@ -40,6 +40,10 @@
 #include <stdint.h>
 #include "inc/hw_nvic.h"
 #include "inc/hw_types.h"
+#include <stdio.h>
+#include <stdarg.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 //*****************************************************************************
 //
@@ -63,7 +67,7 @@ extern uint32_t _bootdata;
 extern uint32_t _bootedata;
 extern uint32_t _bootbss;
 extern uint32_t _bootebss;
-extern uint32_t _bootestack;
+extern uint32_t _estack;
 
 #ifdef opt_bootloader
 extern uint32_t _sharedldata;
@@ -384,5 +388,34 @@ IntDefaultHandler(void)
     //
     while(1)
     {
+    }
+}
+
+/**
+ * _sbrk - newlib memory allocation routine
+ */
+typedef char *caddr_t;
+
+caddr_t _sbrk (int incr)
+{
+    double current_sp;
+    extern char end asm ("end"); /* Defined by linker */
+    static char * heap_end;
+    char * prev_heap_end;
+
+    if (heap_end == NULL) {
+        heap_end = &_bootebss; /* first ram address after bss and data */
+    }
+
+    prev_heap_end = heap_end;
+
+    // simplistic approach to prevent the heap from corrupting the stack
+    // TBD: review for alternatives
+    if ( heap_end + incr < (caddr_t)&current_sp ) {
+        heap_end += incr;
+        return (caddr_t) prev_heap_end;
+    }
+    else {
+        return NULL;
     }
 }

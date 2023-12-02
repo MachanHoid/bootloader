@@ -62,9 +62,9 @@ void led_off(uint8_t pin){
 
 void blink(uint8_t pin, int n, int delay_num){
     for(int i = 0; i < n; i++){
-        led_on(GPIO_PIN_1);
+        led_on(pin);
         delay(delay_num);
-        led_off(GPIO_PIN_1);
+        led_off(pin);
         delay(delay_num);
     }
 }
