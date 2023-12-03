@@ -41,6 +41,7 @@
 #include "inc/hw_nvic.h"
 #include "inc/hw_types.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdarg.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -396,7 +397,7 @@ IntDefaultHandler(void)
  */
 typedef char *caddr_t;
 
-caddr_t malloc (int incr)
+caddr_t _sbrk (int incr)
 {
     double current_sp;
     extern char end asm ("end"); /* Defined by linker */
