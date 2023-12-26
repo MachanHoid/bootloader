@@ -1,103 +1,34 @@
-//*****************************************************************************
-//
-// startup_gcc.c - Startup code for use with GNU tools.
-//
-// Copyright (c) 2013-2020 Texas Instruments Incorporated.  All rights reserved.
-// Software License Agreement
-// 
-//   Redistribution and use in source and binary forms, with or without
-//   modification, are permitted provided that the following conditions
-//   are met:
-// 
-//   Redistributions of source code must retain the above copyright
-//   notice, this list of conditions and the following disclaimer.
-// 
-//   Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimer in the
-//   documentation and/or other materials provided with the  
-//   distribution.
-// 
-//   Neither the name of Texas Instruments Incorporated nor the names of
-//   its contributors may be used to endorse or promote products derived
-//   from this software without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// 
-// This is part of revision 2.2.0.295 of the Tiva Firmware Development Package.
-//
-//*****************************************************************************
-
 #include <stdint.h>
-#include "inc/hw_nvic.h"
-#include "inc/hw_types.h"
 
-//*****************************************************************************
-//
-// Forward declaration of the default fault handlers.
-//
-//*****************************************************************************
+// Forward declarations
+extern "C" void SystemInit(void);
+extern "C" void __libc_init_array(void);
+extern "C" void _init(void);
+
+// Application entry point
+extern "C" int main(void);
+extern "C" uint32_t _appestack;
+extern "C" uint32_t _fini;
+
+// Function prototypes
 void ResetISR(void);
 static void NmiSR(void);
 static void FaultISR(void);
 static void IntDefaultHandler(void);
 
-//*****************************************************************************
-//
-// The following are constructs created by the linker, indicating where the
-// the "data" and "bss" segments reside in memory.  The initializers for the
-// for the "data" segment resides immediately following the "text" segment.
-//
-//*****************************************************************************
-extern uint32_t _appldata;
-extern uint32_t _appdata;
-extern uint32_t _appedata;
-extern uint32_t _appbss;
-extern uint32_t _appebss;
-extern uint32_t _appestack;
 
-//*****************************************************************************
-//
-// The entry point for the application.
-//
-//*****************************************************************************
-extern int main(void);
-
-//*****************************************************************************
-//
-// Reserve space for the system stack.
-//
-//*****************************************************************************
-// static uint32_t pui32Stack[4096];
-
-//*****************************************************************************
-//
-// The vector table.  Note that the proper constructs must be placed on this to
-// ensure that it ends up at physical address 0x0000.0000.
-//
-//*****************************************************************************
-__attribute__ ((section(".isr_vector")))
-void (* const g_pfnVectors[])(void) =
+// Vector table
+extern "C" __attribute__((section(".isr_vector"))) void (*const g_pfnVectors[])(void) =
 {
-    // (void (*)(void))((uint32_t)pui32Stack + sizeof(pui32Stack)),
-    (void *)&_appestack,                       // The initial stack pointer
-    ResetISR,                               // The reset handler
-    NmiSR,                                  // The NMI handler
-    FaultISR,                               // The hard fault handler
-    IntDefaultHandler,                      // The MPU fault handler
-    IntDefaultHandler,                      // The bus fault handler
-    IntDefaultHandler,                      // The usage fault handler
-    0,                                      // Reserved
-    0,                                      // Reserved
+    (void (*)(void))((uint32_t)&_appestack),   // The initial stack pointer
+    ResetISR,                                  // The reset handler
+    NmiSR,                                     // The NMI handler
+    FaultISR,                                  // The hard fault handler
+    IntDefaultHandler,                         // The MPU fault handler
+    IntDefaultHandler,                         // The bus fault handler
+    IntDefaultHandler,                         // The usage fault handler
+    0,                                         // Reserved
+    0,                                         // Reserved
     0,                                      // Reserved
     0,                                      // Reserved
     IntDefaultHandler,                      // SVCall handler
@@ -246,106 +177,64 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler                       // PWM 1 Fault
 };
 
-//*****************************************************************************
-//
-// This is the code that gets called when the processor first starts execution
-// following a reset event.  Only the absolutely necessary set is performed,
-// after which the application supplied entry() routine is called.  Any fancy
-// actions (such as making decisions based on the reset cause register, and
-// resetting the bits in that register) are left solely in the hands of the
-// application.
-//
-//*****************************************************************************
-void
-ResetISR(void)
+
+// Sections defined by the linker script
+extern uint32_t _appldata;
+extern uint32_t _appdata;
+extern uint32_t _appedata;
+extern uint32_t _appbss;
+extern uint32_t _appebss;
+
+// Main function
+extern int main(void);
+
+// Reset handler
+void ResetISR(void)
 {
     uint32_t *pui32Src, *pui32Dest;
 
-    //
-    // Copy the data segment initializers from flash to SRAM.
-    //
+    // Copy data segment initializers from flash to SRAM
     pui32Src = &_appldata;
-    for(pui32Dest = &_appdata; pui32Dest < &_appedata; )
+    for (pui32Dest = &_appdata; pui32Dest < &_appedata; )
     {
         *pui32Dest++ = *pui32Src++;
     }
 
-    //
-    // Zero fill the bss segment.
-    //
-    __asm("    ldr     r0, =_appbss\n"
-          "    ldr     r1, =_appebss\n"
-          "    mov     r2, #0\n"
-          "    .thumb_func\n"
+    // Zero-fill the BSS segment
+    __asm("ldr r0, =_appbss\n"
+          "ldr r1, =_appebss\n"
+          "mov r2, #0\n"
+          ".thumb_func\n"
           "zero_loop:\n"
-          "        cmp     r0, r1\n"
-          "        it      lt\n"
-          "        strlt   r2, [r0], #4\n"
-          "        blt     zero_loop");
+          "cmp r0, r1\n"
+          "it lt\n"
+          "strlt r2, [r0], #4\n"
+          "blt zero_loop");
 
-    //
-    // Enable the floating-point unit.  This must be done here to handle the
-    // case where main() uses floating-point and the function prologue saves
-    // floating-point registers (which will fault if floating-point is not
-    // enabled).  Any configuration of the floating-point unit using DriverLib
-    // APIs must be done here prior to the floating-point unit being enabled.
-    //
-    // Note that this does not use DriverLib since it might not be included in
-    // this project.
-    //
-    HWREG(NVIC_CPAC) = ((HWREG(NVIC_CPAC) &
-                         ~(NVIC_CPAC_CP10_M | NVIC_CPAC_CP11_M)) |
-                        NVIC_CPAC_CP10_FULL | NVIC_CPAC_CP11_FULL);
+    // Enable FPU if used
 
-    //
-    // Call the application's entry point.
-    //
+    // Call the application's entry point
     main();
 }
 
-//*****************************************************************************
-//
-// This is the code that gets called when the processor receives a NMI.  This
-// simply enters an infinite loop, preserving the system state for examination
-// by a debugger.
-//
-//*****************************************************************************
-static void
-NmiSR(void)
+// NMI handler
+static void NmiSR(void)
 {
-    //
-    // Enter an infinite loop.
-    //
-    while(1)
+    while (1)
     {
     }
 }
 
-//*****************************************************************************
-//
-// This is the code that gets called when the processor receives a fault
-// interrupt.  This simply enters an infinite loop, preserving the system state
-// for examination by a debugger.
-//
-//*****************************************************************************
-static void
-FaultISR(void)
+// Hard Fault handler
+static void FaultISR(void)
 {
-    //
-    // Enter an infinite loop.
-    //
-    while(1)
+    while (1)
     {
     }
 }
 
-//*****************************************************************************
-//
-// This is the code that gets called when the processor receives an unexpected
-// interrupt.  This simply enters an infinite loop, preserving the system state
-// for examination by a debugger.
-//
-//*****************************************************************************
+// Default interrupt handler
+
 static void
 IntDefaultHandler(void)
 {

@@ -1,5 +1,5 @@
 #defining constants and directories
-compiler = arm-none-eabi-gcc
+compiler = arm-none-eabi-g++
 assembler = arm-none-eabi-as
 linker = arm-none-eabi-ld
 ocpy = arm-none-eabi-objcopy
@@ -9,7 +9,7 @@ app_folder = src/app
 
 # defining app files in app dir
 rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
-app_files = $(call rwildcard, ./$(app_folder), *.c) 
+app_files = $(call rwildcard, ./$(app_folder), *.cpp) 
 
 dependancy_path = .
 
