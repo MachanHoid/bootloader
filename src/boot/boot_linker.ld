@@ -119,4 +119,4 @@ SECTIONS
     _end = . ;
 }
 
-PROVIDE (_appestack = ORIGIN(APPSRAM) + LENGTH(APPSRAM));
+PROVIDE (_bootestack = ORIGIN(APPSRAM) + LENGTH(APPSRAM));
