@@ -30,105 +30,51 @@ __appsram_size__ = LENGTH(APPSRAM);
 __sharedsram_start__ = ORIGIN(SHAREDSRAM);
 __sharedsram_size__ = LENGTH(SHAREDSRAM);
 
-_bootstack = ORIGIN(BOOTSRAM) + LENGTH(BOOTSRAM);
+_appstack = ORIGIN(APPSRAM) + LENGTH(APPSRAM);
 _heap_start = .; /* Adjust this based on your requirements */
-_heap_end = ORIGIN(BOOTSRAM) + LENGTH(BOOTSRAM);
+_heap_end = ORIGIN(APPSRAM) + LENGTH(APPSRAM);
 
 
 SECTIONS
 {
+    .init_array :
+    {
+        KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*)))
+        KEEP(*(SORT_BY_INIT_PRIORITY(.ctors.*)))
+    } > BOOTROM
+
     .text :
     {
-        . = ALIGN(4);
         _boottext = .;
-
-        /* ISR vector and regular text sections */
         KEEP(*(.isr_vector))
-        *(.text .text* .gnu.linkonce.t.*)
-        *(.glue_7t) *(.glue_7)
-        *(.rodata .rodata* .gnu.linkonce.r.*)
-        *(.ARM.extab* .gnu.linkonce.armextab.*)
-
-        . = ALIGN(4);
-        KEEP(*(.init))
-        . = ALIGN(4);
-        __preinit_array_start = .;
-        KEEP (*(SORT(.preinit_array*)))
-        KEEP (*(.preinit_array))
-        __preinit_array_end = .;
-
-        . = ALIGN(4);
-        __init_array_start = .;
-        KEEP (*(SORT(.init_array.*)))
-        KEEP (*(.init_array))
-        __init_array_end = .;
-
-        . = ALIGN(4);
-        /* C++ ctors (constructors) */
-        KEEP(*(SORT(.ctors.*)))
-        KEEP(*(.ctors.*))
-
-        . = ALIGN(4);
-        KEEP(*(.fini))
-
-        . = ALIGN(4);
-        __fini_array_start = .;
-        KEEP (*(.fini_array))
-        KEEP (*(SORT(.fini_array.*)))
-        __fini_array_end = .;
-
-        . = ALIGN(4);
-        /* C++ dtors (destructors) */
-        KEEP(*(SORT(.dtors.*)))
-        KEEP(*(.dtors.*))
-
-        . = ALIGN(4);
+        *(.text*)
+        *(.rodata*)
         _bootetext = .;
     } > BOOTROM
 
     .data : AT(ADDR(.text) + SIZEOF(.text))
     {
-        
-        . = ALIGN(4);
         _bootdata = .;
         _bootldata = LOADADDR (.data);
         *(vtable)
-        *(.data .data* .gnu.linkonce.d.*)
+        *(.data*)
         _bootedata = .;
     } > BOOTSRAM
 
-    .bss (NOLOAD):
+    .bss :
     {
-
-        . = ALIGN(4);
-        _bootbss = .; 
-        *(.bss .bss*) 
+        _bootbss = .;
+        *(.bss*)
         *(COMMON)
-        . = ALIGN(4); 
         _bootebss = .;
-        . = ALIGN(8);
-    } > BOOTSRAM 
-
-/*
-    .stack (NOLOAD):
-    {
-        . = ALIGN(8);
-        _stack = .;
-        . = . + STACK_SIZE;
-        . = ALIGN(8);
-        _estack = .;
     } > BOOTSRAM
-*/
 
-    PROVIDE_HIDDEN (__exidx_start = .);
-    .ARM.exidx :
+    .fini_array :
     {
-      *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-    } > BOOTSRAM
-    PROVIDE_HIDDEN (__exidx_end = .);
-
-    . = ALIGN(4);
-    _end = . ;
+        KEEP(*(SORT_BY_INIT_PRIORITY(.fini_array.*)))
+        KEEP(*(SORT_BY_INIT_PRIORITY(.dtors.*)))
+        _fini = .;
+    } > BOOTROM
 }
 
 PROVIDE (_bootestack = ORIGIN(APPSRAM) + LENGTH(APPSRAM));

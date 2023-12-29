@@ -15,18 +15,18 @@
 #define DELAY_VALUE        400000  
 
 void Delay(void);
-// using namespace std; 
-// class Geeks 
-// { 
-//     public: 
-//     int id; 
+using namespace std; 
+class Geeks 
+{ 
+    public: 
+    int id; 
       
-//     // printname is not defined inside class definition 
-//     void printname(); 
+    // printname is not defined inside class definition 
+    void printname(); 
       
-//     // printid is defined inside class definition 
-//     void printid();
-// }; 
+    // printid is defined inside class definition 
+    void printid();
+}; 
 
 
 int main(void)
