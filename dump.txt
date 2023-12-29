@@ -1,0 +1,90 @@
+
+outputs/app.elf:     file format elf32-littlearm
+
+SYMBOL TABLE:
+00030000 l    d  .text	00000000 .text
+20001500 l    d  .bss	00000000 .bss
+00000000 l    d  .debug_info	00000000 .debug_info
+00000000 l    d  .debug_abbrev	00000000 .debug_abbrev
+00000000 l    d  .debug_aranges	00000000 .debug_aranges
+00000000 l    d  .debug_ranges	00000000 .debug_ranges
+00000000 l    d  .debug_macro	00000000 .debug_macro
+00000000 l    d  .debug_line	00000000 .debug_line
+00000000 l    d  .debug_str	00000000 .debug_str
+00000000 l    d  .comment	00000000 .comment
+00000000 l    d  .ARM.attributes	00000000 .ARM.attributes
+00000000 l    d  .debug_frame	00000000 .debug_frame
+00000000 l    df *ABS*	00000000 app_startup_gcc.cpp
+00030000 l     O .text	0000026c _ZL12g_pfnVectors
+000303bc l     F .text	00000006 _ZL5NmiSRv
+000303c2 l     F .text	00000006 _ZL8FaultISRv
+000303c8 l     F .text	00000006 _ZL17IntDefaultHandlerv
+00030380 l     F .text	00000000 zero_loop
+00000000 l    df *ABS*	00000000 app.cpp
+000188ac g     F *ABS*	00000058 SysCtlPeripheralReady
+00018c68 g       *ABS*	00000000 _sharedldata
+000181a6 g     F *ABS*	0000002c GPIOPinWrite
+000303ce g       .text	00000000 _appetext
+00018888 g     F *ABS*	00000024 _Z6led_onh
+0001882c g     F *ABS*	00000024 _Z7led_offh
+00030350 g     F .text	00000064 _Z8ResetISRv
+0003026c  w    F .text	00000026 _ZN5GeeksC2Ev
+20001500 g       .text	00000000 _appedata
+00018764 g     F *ABS*	00000050 SysCtlPeripheralEnable
+00018850 g     F *ABS*	00000038 UARTCharPut
+20001500 g       *ABS*	00000000 __appsram_start__
+00018000 g       *ABS*	00000000 __bootrom_size__
+0001805a g     F *ABS*	00000042 _Z5blinkhii
+00006000 g       *ABS*	00000000 __sram_size__
+2000026c g       *ABS*	00000000 _sharededata
+00018000 g     F *ABS*	00000032 _Z5delayi
+00018000 g       *ABS*	00000000 _sharedtext
+20001500 g       .text	00000000 _appdata
+20001500 g     O .bss	00000004 testing_global
+00029000 g       *ABS*	00000000 __appheader_start__
+20000000 g       *ABS*	00000000 _shareddata
+20002000 g       *ABS*	00000000 __sram_start__
+00018032 g     F *ABS*	00000028 UARTCharsAvail
+00018144 g     F *ABS*	00000036 UARTCharGetNonBlocking
+00018b6c g       *ABS*	00000000 _ZL12g_pui32Xtals
+0001809c g     F *ABS*	00000044 _Z9led_setupv
+000184cc g     F *ABS*	000000d0 FlashProgram
+20000272 g       *ABS*	00000000 _sharedebss
+0001859c g     F *ABS*	00000074 FlashErase
+000302b0 g     F .text	000000a0 main
+00018904 g     F *ABS*	00000214 SysCtlClockGet
+00018b18 g     F *ABS*	00000052 UARTDisable
+000303ce g       .debug_info	00000000 _fini
+00010000 g       *ABS*	00000000 __approm_size__
+00001000 g       *ABS*	00000000 __sharedsram_size__
+00018610 g     F *ABS*	00000032 UARTCharGet
+20001500 g       .bss	00000000 _appbss
+2000026c g       *ABS*	00000000 _ZL22g_pui8OversampleFactor
+20008000 g       .bss	00000000 _estack
+000303ce g       *ABS*	00000000 _appldata
+00000500 g       *ABS*	00000000 __appsram_size__
+00017000 g       *ABS*	00000000 __shared_size__
+00018118 g     F *ABS*	0000002c GPIOPinTypeUART
+00018000 g       *ABS*	00000000 __shared_start__
+00018c68 g       *ABS*	00000000 _sharedetext
+0001817a g     F *ABS*	0000002c GPIOPinTypeGPIOOutput
+2000026c g       *ABS*	00000000 _sharedbss
+00030000 g       .text	00000000 _apptext
+000186d4 g     F *ABS*	00000090 GPIOPinConfigure
+000187b4 g     F *ABS*	00000076 GPIODirModeSet
+00000500 g       *ABS*	00000000 __bootsram_size__
+00000000 g       *ABS*	00000000 __bootrom_start__
+20001000 g       *ABS*	00000000 __bootsram_start__
+00001000 g       *ABS*	00000000 __appheader_size__
+20000000 g       *ABS*	00000000 __sharedsram_start__
+20000000 g       *ABS*	00000000 _ZL15g_pfnRAMVectors
+00018642 g     F *ABS*	00000092 UARTConfigSetExpClk
+20001504 g       .bss	00000000 _appebss
+00018bd8 g       *ABS*	00000000 _ZL20g_pui32GPIOBaseAddrs
+00030292  w    F .text	0000001e _ZN5Geeks7printidEv
+000181d4 g     F *ABS*	000002f8 GPIOPadConfigSet
+00030000 g       *ABS*	00000000 __approm_start__
+000180e0 g     F *ABS*	00000038 UARTEnable
+0003026c  w    F .text	00000026 _ZN5GeeksC1Ev
+
+

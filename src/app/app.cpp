@@ -58,24 +58,29 @@ __error__(char *pcFilename, uint32_t ui32Line)
 //
 //*****************************************************************************
 using namespace std; 
-class Geeks 
-{ 
-    public: 
-    int id; 
-      
-    // printname is not defined inside class definition 
-    void printname(){
-        while(1);
-    }; 
+class Geeks {
+private:
+    int id;
 
-}; 
+public:
+    // Constructor
+    Geeks() {
+        id = 1;
+        id+=1;
+        // Initialization of 'id' to 1 in the constructor
+    }
 
+    // Function to print the id
+    void printid() {
+        id+=1;
+    }
+};
+
+Geeks testing_global;
 
 int
 main(void)
 {
-    // Geeks mygeek;
-    // mygeek.printname();
     volatile uint32_t ui32Loop;
 
     //
@@ -124,5 +129,8 @@ main(void)
         for(ui32Loop = 0; ui32Loop < 200000; ui32Loop++)
         {
         }
+        Geeks test_local;
+        test_local.printid();
+        testing_global.printid();
     }
 }
