@@ -37,10 +37,11 @@ defines = TARGET_IS_TM4C123_RB1 \
 includes = ${dependancy_path}/shared_libraries \
 
 #to create .elf directly from c files
-CFLAGS = -nostdlib \
+CFLAGS = -libstdc++ \
 		--specs=nosys.specs \
 		-mcpu=cortex-m4 \
 		-fpermissive \
+		-fno-exceptions \
 		-mfloat-abi=hard \
 		-g3 
 
@@ -50,11 +51,12 @@ CFLAGS += $(foreach d,$(defines),-D $(d))
 CFLAGS +=  -T ${linker_file}
 
 #to compile the .c files to .o files.
-SHAREDLIB_COMPILE_FLAGS = -nostdlib \
+SHAREDLIB_COMPILE_FLAGS = -libstdc++ \
 						-mcpu=cortex-m4 \
 						-mfloat-abi=hard \
 						-ffunction-sections \
 						-fpermissive \
+						-fno-exceptions \
 						-fdata-sections \
 						-c -Wall\
 						-g3

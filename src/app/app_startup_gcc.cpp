@@ -63,7 +63,7 @@ extern uint32_t _appdata;
 extern uint32_t _appedata;
 extern uint32_t _appbss;
 extern uint32_t _appebss;
-extern uint32_t _appestack;
+extern uint32_t _estack;
 
 //*****************************************************************************
 //

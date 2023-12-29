@@ -27,11 +27,13 @@ defines = TARGET_IS_TM4C123_RB1 \
 includes = ${dependancy_path}/shared_libraries 
 
 #to compile .o from .c files
-SHAREDLIB_COMPILE_FLAGS = -nostdlib \
+SHAREDLIB_COMPILE_FLAGS = -libstdc++ \
 						-mcpu=cortex-m4 \
 						-mfloat-abi=hard \
 						-ffunction-sections \
 						-fdata-sections \
+						-fno-exceptions \
+						-fpermissive \
 						-c -Wall\
 						-g3
 
