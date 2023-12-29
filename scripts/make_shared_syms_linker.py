@@ -32,3 +32,6 @@ for sym in shared_elf_syms:
     # if check_type(opt_shared, sym_name, types):
     #     shared_syms_linker_file.write(sym)
     shared_syms_linker_file.write(sym)
+
+
+    

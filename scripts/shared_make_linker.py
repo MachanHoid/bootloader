@@ -59,7 +59,14 @@ new_linker = ''
 checkerDiscard = 0
 checkerText = 0
 checkerRodata = 0
+checkerExceptions = 0
 linker_lines = linker.readlines()
+
+# readelf -a your_binary.elf
+# This contains a line about .ARM.extab or extensions. Since we are compiling with -fno-exceptions, it is not coming up.
+# This list can be then added to making a shared_syms_exceptions. We can use both the elfs to get intersections and unions and do the same
+
+exceptions_list = []
 
 for i in linker_lines:
     if i.strip() == '*(.text*)' and checkerText == 0:
@@ -71,6 +78,12 @@ for i in linker_lines:
     elif i.strip() == '*(.rodata*)' and checkerRodata == 0:
         new_linker += '\n\t\t'
         new_linker += '\n\t\t'.join([f'*(.rodata.{sym})' for sym in includes['R']+includes['r']]) 
+        new_linker += '\n'
+        checkerRodata = 1
+
+    elif '.ARM.extab*' in i.strip().split() and checkerExceptions == 1:
+        new_linker += '\n\t\t'
+        new_linker += '\n\t\t'.join([f'*(.ARM.extab.{sym})' for sym in exceptions_list]) 
         new_linker += '\n'
         checkerRodata = 1
     elif i.strip() == '} > SHARED' and checkerDiscard == 0:

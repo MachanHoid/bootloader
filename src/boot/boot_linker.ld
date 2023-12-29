@@ -41,6 +41,8 @@ SECTIONS
     {
         . = ALIGN(4);
         _boottext = .;
+
+        /* ISR vector and regular text sections */
         KEEP(*(.isr_vector))
         *(.text .text* .gnu.linkonce.t.*)
         *(.glue_7t) *(.glue_7)
@@ -62,6 +64,11 @@ SECTIONS
         __init_array_end = .;
 
         . = ALIGN(4);
+        /* C++ ctors (constructors) */
+        KEEP(*(SORT(.ctors.*)))
+        KEEP(*(.ctors.*))
+
+        . = ALIGN(4);
         KEEP(*(.fini))
 
         . = ALIGN(4);
@@ -69,6 +76,11 @@ SECTIONS
         KEEP (*(.fini_array))
         KEEP (*(SORT(.fini_array.*)))
         __fini_array_end = .;
+
+        . = ALIGN(4);
+        /* C++ dtors (destructors) */
+        KEEP(*(SORT(.dtors.*)))
+        KEEP(*(.dtors.*))
 
         . = ALIGN(4);
         _bootetext = .;
