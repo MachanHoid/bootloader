@@ -29,6 +29,7 @@ SHAREDLIB_COMPILE_FLAGS = -nostdlib \
 						-fno-exceptions \
 						-fpermissive \
 						-c -Wall\
+						-lstdc++ \
 						-g3
 
 SHAREDLIB_COMPILE_FLAGS += $(foreach i,$(includes),-I$(i))

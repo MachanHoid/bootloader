@@ -43,6 +43,7 @@ CFLAGS = -nostdlib \
 		-fpermissive \
 		-fno-exceptions \
 		-mfloat-abi=hard \
+		-lstdc++ \
 		-g3 
 
 CFLAGS += $(foreach i,$(includes),-I$(i))
@@ -59,6 +60,7 @@ SHAREDLIB_COMPILE_FLAGS = -nostdlib \
 						-fno-exceptions \
 						-fdata-sections \
 						-c -Wall\
+						-lstdc++ \
 						-g3
 
 SHAREDLIB_COMPILE_FLAGS += $(foreach i,$(includes),-I$(i))

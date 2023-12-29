@@ -2,6 +2,12 @@ INCLUDE linkers/memory_map.ld
 
 SECTIONS
 {
+    .init_array :
+    {
+        KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*)))
+        KEEP(*(SORT_BY_INIT_PRIORITY(.ctors.*)))
+    } > APPROM
+
     .text :
     {
         _apptext = .;
@@ -27,6 +33,13 @@ SECTIONS
         *(COMMON)
         _appebss = .;
     } > APPSRAM
+
+    .fini_array :
+    {
+        KEEP(*(SORT_BY_INIT_PRIORITY(.fini_array.*)))
+        KEEP(*(SORT_BY_INIT_PRIORITY(.dtors.*)))
+        _fini = .;
+    } > APPROM
 }
 
 PROVIDE (_estack = ORIGIN(SRAM) + LENGTH(SRAM));

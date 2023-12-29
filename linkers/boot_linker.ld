@@ -2,6 +2,12 @@ INCLUDE linkers/memory_map.ld
 
 SECTIONS
 {
+    .init_array :
+    {
+        KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*)))
+        KEEP(*(SORT_BY_INIT_PRIORITY(.ctors.*)))
+    } > BOOTROM
+
     .text :
     {
         _boottext = .;
@@ -27,6 +33,14 @@ SECTIONS
         *(COMMON)
         _bootebss = .;
     } > BOOTSRAM
+
+    .fini_array :
+    {
+        KEEP(*(SORT_BY_INIT_PRIORITY(.fini_array.*)))
+        KEEP(*(SORT_BY_INIT_PRIORITY(.dtors.*)))
+        _fini = .;
+    } > BOOTROM
+
 }
 
 PROVIDE (_estack = ORIGIN(SRAM) + LENGTH(SRAM));

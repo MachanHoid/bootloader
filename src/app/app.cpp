@@ -57,9 +57,25 @@ __error__(char *pcFilename, uint32_t ui32Line)
 // Blink the on-board LED.
 //
 //*****************************************************************************
+using namespace std; 
+class Geeks 
+{ 
+    public: 
+    int id; 
+      
+    // printname is not defined inside class definition 
+    void printname(){
+        while(1);
+    }; 
+
+}; 
+
+
 int
 main(void)
 {
+    // Geeks mygeek;
+    // mygeek.printname();
     volatile uint32_t ui32Loop;
 
     //
