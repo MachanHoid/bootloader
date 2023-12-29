@@ -63,7 +63,7 @@ extern uint32_t _bootdata;
 extern uint32_t _bootedata;
 extern uint32_t _bootbss;
 extern uint32_t _bootebss;
-extern uint32_t _bootestack;
+extern uint32_t _estack;
 
 #ifdef opt_bootloader
 extern uint32_t _sharedldata;

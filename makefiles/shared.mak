@@ -1,5 +1,5 @@
 #defining constants and directories
-compiler = arm-none-eabi-gcc
+compiler = arm-none-eabi-g++
 assembler = arm-none-eabi-as
 linker = arm-none-eabi-ld
 ocpy = arm-none-eabi-objcopy
@@ -10,10 +10,10 @@ dependancy_path:= .
 rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
 
 sharedlib_src_dir = shared_libraries
-sharedlib_src = $(call rwildcard, ./$(sharedlib_src_dir), *.c)
+sharedlib_src = $(call rwildcard, ./$(sharedlib_src_dir), *.c *.cpp)
 
 sharedlib_obj_dir = build/obj_temp/shared_libraries_obj_temp
-sharedlib_obj = $(patsubst ./$(sharedlib_src_dir)/%.c, ./$(sharedlib_obj_dir)/%.o, $(sharedlib_src))
+sharedlib_obj = $(patsubst ./$(sharedlib_src_dir)/%.cpp, ./$(sharedlib_obj_dir)/%.o, $(patsubst ./$(sharedlib_src_dir)/%.c, ./$(sharedlib_obj_dir)/%.o, $(sharedlib_src)))
 
 defines = TARGET_IS_TM4C123_RB1 \
 		PART_TM4C123GH6PM \

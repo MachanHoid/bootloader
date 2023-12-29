@@ -19,15 +19,19 @@ create_build_dir:
 
 
 prepare_shared:
+	@echo making prepare_shared
 	make -f makefiles/gen_shared_funcs.mak
 
 shared:
+	@echo making shared
 	make -f makefiles/shared.mak
 
 bootloader:
+	@echo making bootloader
 	make -f makefiles/boot.mak 
 
 app:
+	@echo making app
 	make -f makefiles/app.mak
 
 mass_erase:

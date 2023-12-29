@@ -4,9 +4,9 @@ new_linker_file = build/linkers_temp/boot_linker_new.ld
 boot_folder = src/boot
 
 rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
-boot_files = $(call rwildcard, ./$(boot_folder), *.c) 
+boot_files = $(call rwildcard, ./$(boot_folder), *.c *.cpp) 
 
-compiler = arm-none-eabi-gcc
+compiler = arm-none-eabi-g++
 assembler = arm-none-eabi-as
 linker = arm-none-eabi-ld
 ocpy = arm-none-eabi-objcopy
@@ -27,7 +27,7 @@ make_new_linker:
 boot_obj_dir = build/obj_temp/boot_obj_temp
 boot_folder_escaped = src\/boot
 boot_obj_dir_escaped = build\/obj_temp\/boot_obj_temp
-boot_obj = $(foreach i,$(boot_files), $(shell echo $(i) | sed 's/$(boot_folder_escaped)/$(boot_obj_dir_escaped)/1; s/\.c/\.o/'))
+boot_obj = $(foreach i,$(boot_files), $(shell echo $(i) | sed 's/$(boot_folder_escaped)/$(boot_obj_dir_escaped)/1; s/\.cpp/\.o/; s/\.c/\.o/'))
 
 LFAGS = -T ${new_linker_file}
 LFAGS += --gc-sections

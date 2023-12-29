@@ -14,6 +14,8 @@
 #include "utils/uartstdio.h"
 #include "driverlib/flash.h"
 
+#include "shared.h"
+
 //defining memory map variables
 uint32_t approm_start = &__approm_start__;
 uint32_t approm_size = &__approm_size__;

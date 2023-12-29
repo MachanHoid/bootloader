@@ -3,7 +3,7 @@ linker_file = linkers/shared_linker.ld
 boot_folder = src/boot
 
 
-compiler = arm-none-eabi-gcc
+compiler = arm-none-eabi-g++
 assembler = arm-none-eabi-as
 linker = arm-none-eabi-ld
 ocpy = arm-none-eabi-objcopy
@@ -17,13 +17,14 @@ dependancy_path:= .
 rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
 
 sharedlib_src_dir = shared_libraries
-sharedlib_src = $(call rwildcard, ./$(sharedlib_src_dir), *.c)
+sharedlib_src = $(call rwildcard, ./$(sharedlib_src_dir), *.c *.cpp)
 
 sharedlib_obj_dir = build/obj_temp/shared_libraries_obj_temp
-sharedlib_obj = $(patsubst ./$(sharedlib_src_dir)/%.c, ./$(sharedlib_obj_dir)/%.o, $(sharedlib_src))
+# sharedlib_obj := $(patsubst ./$(sharedlib_src_dir)/%.c, ./$(sharedlib_obj_dir)/%.o, $(sharedlib_src))
+sharedlib_obj = $(patsubst ./$(sharedlib_src_dir)/%.cpp, ./$(sharedlib_obj_dir)/%.o, $(patsubst ./$(sharedlib_src_dir)/%.c, ./$(sharedlib_obj_dir)/%.o, $(sharedlib_src)))
 
 #defining bootfiles recursively
-boot_files = $(call rwildcard, ./$(boot_folder), *.c) 
+boot_files = $(call rwildcard, ./$(boot_folder), *.c *.cpp) 
 
 .PHONY: all 
 
@@ -39,6 +40,7 @@ includes = ${dependancy_path}/shared_libraries \
 CFLAGS = -nostdlib \
 		--specs=nosys.specs \
 		-mcpu=cortex-m4 \
+		-fpermissive \
 		-mfloat-abi=hard \
 		-g3 
 
@@ -52,6 +54,7 @@ SHAREDLIB_COMPILE_FLAGS = -nostdlib \
 						-mcpu=cortex-m4 \
 						-mfloat-abi=hard \
 						-ffunction-sections \
+						-fpermissive \
 						-fdata-sections \
 						-c -Wall\
 						-g3
@@ -71,6 +74,11 @@ compile_bootloader_stage1: $(sharedlib_obj)
 	@echo compiling shared_libraries for bootloader
 
 #generate symbols while making .o files for all the sharedlib
+$(sharedlib_obj_dir)/%.o : $(sharedlib_src_dir)/%.cpp
+	mkdir -p $(dir $@)
+	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $< -o $@
+	$(python) -u "scripts/gen_syms.py" $@ $(sharedlib_json)
+
 $(sharedlib_obj_dir)/%.o : $(sharedlib_src_dir)/%.c
 	mkdir -p $(dir $@)
 	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $< -o $@
@@ -80,12 +88,16 @@ $(sharedlib_obj_dir)/%.o : $(sharedlib_src_dir)/%.c
 boot_obj_dir = build/obj_temp/boot_obj_temp
 boot_folder_escaped = src\/boot
 boot_obj_dir_escaped = build\/obj_temp\/boot_obj_temp
-boot_obj = $(foreach i,$(boot_files), $(shell echo $(i) | sed 's/$(boot_folder_escaped)/$(boot_obj_dir_escaped)/1; s/\.c/\.o/'))
+boot_obj = $(foreach i,$(boot_files), $(shell echo $(i) | sed 's/$(boot_folder_escaped)/$(boot_obj_dir_escaped)/1; s/\.cpp/\.o/; s/\.c/\.o/'))
 
 #compile the bootloader files
 compile_bootloader_stage2: $(boot_obj)
-	@echo compiling main and 
+	@echo compiling boot objects 
 	mkdir -p $(boot_obj_dir)
+
+$(boot_obj_dir)/%.o : $(boot_folder)/%.cpp
+	mkdir -p $(dir $@)	
+	$(compiler) $(SHAREDLIB_COMPILE_FLAGS) $^ -o $@
 
 $(boot_obj_dir)/%.o : $(boot_folder)/%.c
 	mkdir -p $(dir $@)	
