@@ -2,18 +2,37 @@ INCLUDE linkers/memory_map.ld
 
 SECTIONS
 {
-    .init_array :
-    {
-        KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*)))
-        KEEP(*(SORT_BY_INIT_PRIORITY(.ctors.*)))
-    } > BOOTROM
-
     .text :
     {
         _boottext = .;
         KEEP(*(.isr_vector))
         *(.text .text* .gnu.linkonce.t.*)
         *(.rodata .rodata* .gnu.linkonce.r.*)
+
+        . = ALIGN(4);
+        KEEP(*(.init))
+        . = ALIGN(4);
+        __preinit_array_start = .;
+        KEEP (*(SORT(.preinit_array*)))
+        KEEP (*(.preinit_array))
+        __preinit_array_end = .;
+
+        . = ALIGN(4);
+        __init_array_start = .;
+        KEEP (*(SORT(.init_array.*)))
+        KEEP (*(.init_array))
+        __init_array_end = .;
+
+        . = ALIGN(4);
+        KEEP(*(.fini))
+
+        . = ALIGN(4);
+        __fini_array_start = .;
+        KEEP (*(.fini_array))
+        KEEP (*(SORT(.fini_array.*)))
+        __fini_array_end = .;
+
+        . = ALIGN(4);
         _bootetext = .;
     } > BOOTROM
 
@@ -33,14 +52,6 @@ SECTIONS
         *(COMMON)
         _bootebss = .;
     } > BOOTSRAM
-
-    .fini_array :
-    {
-        KEEP(*(SORT_BY_INIT_PRIORITY(.fini_array.*)))
-        KEEP(*(SORT_BY_INIT_PRIORITY(.dtors.*)))
-        _fini = .;
-    } > BOOTROM
-
 }
 
 PROVIDE (_estack = ORIGIN(SRAM) + LENGTH(SRAM));
