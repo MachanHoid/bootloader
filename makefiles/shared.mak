@@ -19,7 +19,8 @@ defines = TARGET_IS_TM4C123_RB1 \
 		PART_TM4C123GH6PM \
 		gcc \
 		
-includes = ${dependancy_path}/shared_libraries 
+includes = ${dependancy_path}/shared_libraries \
+			/System/Volumes/Data/Users/niting/Library/Arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/avr/include/
 
 #to compile .c files to .o files
 SHAREDLIB_COMPILE_FLAGS = -nostdlib \

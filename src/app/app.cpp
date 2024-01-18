@@ -31,6 +31,8 @@
 
 #include "shared.h"
 
+#include "Arduino.h"
+
 //*****************************************************************************
 //
 //! \addtogroup example_list
