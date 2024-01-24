@@ -18,9 +18,10 @@ sharedlib_obj = $(patsubst ./$(sharedlib_src_dir)/%.cpp, ./$(sharedlib_obj_dir)/
 defines = TARGET_IS_TM4C123_RB1 \
 		PART_TM4C123GH6PM \
 		gcc \
+		F_CPU=80000000L
 		
 includes = ${dependancy_path}/shared_libraries \
-			/System/Volumes/Data/Users/niting/Library/Arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/avr/include/
+			./shared_libraries/tivac
 
 #to compile .c files to .o files
 SHAREDLIB_COMPILE_FLAGS = -nostdlib \
@@ -30,7 +31,6 @@ SHAREDLIB_COMPILE_FLAGS = -nostdlib \
 						-fno-exceptions \
 						-fpermissive \
 						-c -Wall\
-						-lstdc++ \
 						-g3
 
 SHAREDLIB_COMPILE_FLAGS += $(foreach i,$(includes),-I$(i))

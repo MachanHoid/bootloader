@@ -33,20 +33,21 @@ all:  compile_bootloader get_dependancies
 defines = TARGET_IS_TM4C123_RB1 \
 		PART_TM4C123GH6PM \
 		gcc \
+		F_CPU=80000000L
 
 #generalise this
 includes = ${dependancy_path}/shared_libraries \
-			/System/Volumes/Data/Users/niting/Library/Arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/avr/include/
+			./shared_libraries/tivac
 
 #to create .elf directly from c files
+#use nostdinc to actually not include it, nostdlib doesnt do anything
 CFLAGS = -nostdlib \
 		--specs=nosys.specs \
 		-mcpu=cortex-m4 \
 		-fpermissive \
 		-fno-exceptions \
 		-mfloat-abi=hard \
-		-lstdc++ \
-		-g3 
+		-g3 \ 
 
 CFLAGS += $(foreach i,$(includes),-I$(i))
 CFLAGS += $(foreach d,$(defines),-D $(d))
@@ -62,7 +63,6 @@ SHAREDLIB_COMPILE_FLAGS = -nostdlib \
 						-fno-exceptions \
 						-fdata-sections \
 						-c -Wall\
-						-lstdc++ \
 						-g3
 
 SHAREDLIB_COMPILE_FLAGS += $(foreach i,$(includes),-I$(i))
@@ -111,7 +111,7 @@ $(boot_obj_dir)/%.o : $(boot_folder)/%.c
 
 bootloader_linker = linkers/boot_linker.ld
 LFAGS = -T ${bootloader_linker}
-LFAGS += --gc-sections
+LFAGS += --gc-sections 
 
 #link it with gc sections to make unopt_bootloader
 link_bootloader: $(boot_obj) $(sharedlib_obj) 
